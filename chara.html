@@ -1,11 +1,266 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>캐릭터 소개-베스하먼</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+
+        section { margin-bottom: 150px;}
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        .top-edge {
+            background-color: #4E362D;
+            height: 80px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        /* 책 표지 섹션 */
+        .cover-section {
+            display: flex;
+            background-color: #ffffff;
+            margin-top: 80px;
+            margin-bottom: 60px;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .book-graphic-area {
+            background-color: #4E362D;
+            width: 320px;
+            height: 380px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .cover-portrait {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .book-info-area {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .info-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #4E362D;
+            margin: 0;
+        }
+
+        .info-subtitle {
+            font-size: 1rem;
+            color: #888;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #4E362D;
+            margin-top: 50px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #999;
+            padding-bottom: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background-color: #4E362D;
+            margin-right: 10px;
+        }
+
+        .content-body {
+            font-size: 0.95rem;
+            color: #444;
+            line-height: 1.8;
+        }
+
+        .content-body p { margin-top: 0;}
+
+        .highlight-box {
+            background-color: #f4f7f6;
+            padding: 40px;
+            text-align: center;
+            margin: 40px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .text-emerald { color: #4E362D; }
+
+        /* 목차 */
+        .toc-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .toc-group {
+            margin-bottom: 20px;
+        }
+
+        .toc-head {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .toc-sub {
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        .video-column {
+            display: flex;
+            flex-direction: column; 
+            gap: 30px; 
+            margin-top: 50px;
+            max-width: 800px; 
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 120px;
+        }
+
+        .video-card {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background-color: #000;
+        }
+        
+        .video-card iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        @media (max-width: 600px) {
+            .info-title { font-size: 1.8rem; }
+        }
+    </style>
 </head>
 <body>
-    
+
+<div class="top-edge">HTML 활용하여 책 소개하기</div>
+
+<div class="container">
+    <header class="cover-section">
+        <div class="book-graphic-area">
+            <img src="img/chara.jpg" class="cover-portrait">
+        </div>
+        
+        <div class="book-info-area">
+            <div class="info-label">Neflix series Queens Gambit</div>
+            <h2 class="info-title">엘리자베스 하먼</h2>
+        </div>
+    </header>
+
+    <section>
+        <div class="section-title">캐릭터 소개</div>
+        <div class="content-body">
+            <strong>넷플릭스 오리지널 시리즈 ‘퀸스갬빗’의 주인공</strong><br>
+            체스에 천부적인 재능을 지닌 천재로, 어렸을 적부터 남이 체스를 두는 모습을 보고 혼자서 룰을 습득하고, 인근 고등학교의 체스 클럽 전원을 한꺼번에 상대하고도 압승하는 등 사기적인 재능을 보였다. 고아원의 나이 든 관리인인 샤이벨 씨와 지하실에서 체스를 두며 배운 특이한 경력을 지니고 있는데, 유년기는 정신적으로 불안정한 어머니 밑에서 보냈기 때문에 체스를 접할 기회가 없었고, 체스를 처음 접했을 때부터 이미 신동이라 부를 만한 실력을 지니고 있었음에도 고아원의 엄격한 분위기 때문에 이름을 알릴 기회가 없었다. 하지만 본격적으로 체스의 세계에 발을 들여놓고 나서는 경쟁자를 하나하나 꺾어나가며 빠르게 정상을 향해 나아간다.
+        </div>
+    </section>
+
+
+
+    <section>
+        <div class="section-title">에피소드 목록</div>
+        <div class="content-body">
+            <strong>01 오프닝</strong>
+            <p>가족을 잃고 보육원에 맡겨지는 아홉 살 베스. 그곳에서 소녀는 새로운 세계에 눈뜬다.<br> 
+                체스와 초록색 안정제가 있는 세상. 처음 경험한 것들에 완전히 사로잡힌다.</p>
+        </div>
+        <div class="content-body">
+            <strong>02 계산</strong>
+            <p>예상치 못했던 변화. 베스는 갑자기 교외 생활을 시작한다. <br> 
+                아름다운 집, 새로운 옷과 함께. 하지만 고등학교 친구들과 어울리기는 쉽지 않다. <br>그녀의 관심은 체스뿐이다.</p>
+        </div>
+        <div class="content-body">
+            <strong>03 오류</strong>
+            <p>신시내티까지 진출하는 베스. 매니저가 생기고, 언론의 관심이 쏟아진다. <br> 
+                하지만 더욱 타오르는 우승에의 열망. 그녀는 라스베이거스에서 열리는 US 오픈을 목표로 삼는다.</p>
+        </div>
+        <div class="content-body">
+            <strong>04 미들게임</strong>
+            <p>멕시코시티에 도착한 모녀. <br> 
+                베스의 어머니는 펜팔 친구와 행복한 시간을 보낸다. 하지만 베스에게는 더없이 불안한 날이 닥친다. 위협적인 상대인 보르고프와 맞붙는다.</p>
+        </div>
+        <div class="content-body">
+            <strong>05 혼자</strong>
+            <p>고향인 켄터키에 돌아왔으나, 안정되지 않는 마음.<br> 
+                US 챔피언십을 앞두고, 정신을 가다듬으려는 베스에게 예전 상대가 찾아온다. 체스 훈련을 도와줄게. 네가 더 잘하지만.</p>
+        </div>
+        <div class="content-body">
+            <strong>06 포기</strong>
+            <p>끝없는 연습과 공부. 뉴욕에서 시간을 보낸 후, 파리에 가는 베스. 드디어 보르고프와 재대결한다.<br> 
+                얼마나 벼르고 준비한 시합인데! 하필 이때 긴장의 끈을 놓치고 만다.</p>
+        </div>
+        <div class="content-body">
+            <strong>07 엔드게임</strong>
+            <p>오랜 친구의 뜻밖의 방문. 베스는 과거를 되돌아보는 시간을 갖는다. <br> 
+                지금 내게 중요한 게 뭘까. 이게 잘한 선택일까. 어쩌면 그녀는 일생일대의 시합을 놓칠 수도 있다.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-title">관련 영상</div>
+        <div class="video-column">
+            <div class="video-card">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/2Kd_4OOfmE0?si=cPXJPXSjLyNqFqJL" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <div class="video-card">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/UQla0kPvoSk?si=P2xeHYTw4Mg58Rl-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+</div>
+
 </body>
 </html>
