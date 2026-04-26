@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>책 소개 - 나는 나</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        .top-edge {
+            background-color: #017149;
+            height: 80px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        /* 책 표지 섹션 */
+        .cover-section {
+            display: flex;
+            background-color: #ffffff;
+            margin-top: 40px;
+            margin-bottom: 60px;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .book-graphic-area {
+            background-color: #017149;
+            width: 244px;
+            height: 355px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .cover-portrait {
+            width: 100%;
+            height: auto;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .book-info-area {
+            flex: 1;
+            min-width: 300px;
+            padding-bottom: 20px;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #017149;
+            margin: 0 0 10px 0;
+        }
+
+        .info-subtitle {
+            font-size: 1rem;
+            color: #888;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #017149;
+            margin-top: 50px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background-color: #017149;
+            margin-right: 10px;
+        }
+
+        .content-body {
+            font-size: 0.95rem;
+            color: #444;
+            line-height: 1.8;
+        }
+
+        .highlight-box {
+            background-color: #f4f7f6;
+            padding: 40px;
+            text-align: center;
+            margin: 40px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .text-emerald { color: #017149; }
+
+        /* 목차 */
+        .toc-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .toc-group {
+            margin-bottom: 20px;
+        }
+
+        .toc-head {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .toc-sub {
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        .video-column {
+            display: flex;
+            flex-direction: column; 
+            gap: 30px; 
+            margin-top: 20px;
+            max-width: 800px; 
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .video-card {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background-color: #000;
+        }
+        
+        .video-card iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        @media (max-width: 600px) {
+            .info-title { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-edge">책 소개</div>
+
+<div class="container">
+    <header class="cover-section">
+        <div class="book-graphic-area">
+            <img src="img/book.jpg" alt="가네코 후미코 초상화" class="cover-portrait">
+        </div>
+        
+        <div class="book-info-area">
+            <div class="info-label">일본인 독립운동가 가네코 후미코 옥중수기</div>
+            <h2 class="info-title">나는 나</h2>
+            <div class="info-subtitle">원제: 무엇이 나를 이렇게 만들었는가</div>
+        </div>
+    </header>
+
+    <section>
+        <div class="section-title">책 소개</div>
+        <div class="content-body">
+            1923년 일본의 관동대지진 이후<br>
+            일왕 및 황태자 암살 혐의로 체포된<br>
+            독립운동가 박열과 그의 연인 가네코 후미코.<br>
+            <br>
+            가네코 후미코는 예심 판사에게<br>
+            재판에 도움이 될 수 있도록<br>
+            자신의 일대기를 쓸 것을 명령 받는다.
+        </div>
+    </section>
+
+    <div class="highlight-box">
+        <p class="text-emerald">
+            “<br>
+            유복한 가정에서 태어나지 않고<br>
+            가는 곳마다 모든 환경 속에서<br>
+            학대받을 만큼 학대 받은 나의 운명에 감사한다<br><br>
+
+            운명적으로 불운한 탓에<br>
+            나는 나 자신을 발견할 수 있었다.<br><br>
+
+            그렇다. 나는 내 삶을 스스로 개척하고 스스로 창조해야 한다.<br>
+            ”
+        </p>
+    </div>
+
+    <section>
+        <div class="section-title">작가 소개</div>
+        <div class="content-body">
+            <strong>가네코 후미코 1903~1926</strong>
+            <p>1903년 1월 25일 요코하마시 출생. 아버지 사에키 분이치와 어머니 가네코 기쿠노 사이에서 장녀로 태어났지만, 출생신고를 하지 않아 ‘무적자’로 살았다. 1912년, 당시 충청북도 부강에 살던 고모의 양녀가 되어 조선으로 건너가 약 7년간 생활한다. 이때 외할아버지 가네코 도미타로의 다섯째 딸로 입적한다. 1919년 4월 12일 조선을 떠나 일본으로 돌아온 후미코는 1920년 봄에 상경하여 신문팔이를 하면서 학업을 병행한다. 거리 연설에서, 학교에서, 일터에서 사회주의자들과 만난 것을 계기로 사회주의에 관심을 가지게 되었고, 특히 니힐리즘에 심취하였다. 잡지 『청년조선(青年朝鮮)』에 실린 박열의 시 「개새끼(犬コロ)」를 읽고 큰 감동을 받은 후미코는 1922년 4월경부터 박열과 동지로서 동거를 시작한다. 두 사람은 흑도회의 기관지 『흑도(黒涛)』 간행에 착수하여 1호와 2호를 발간하고, 흑도회가 해산한 이후에는 월간지 『후테이센징(太い鮮人)』을 발간한다. 1923년 4월에는 박열과 함께 ‘불령사(不逞社)’를 결성한다. 관동대지진 직후인 1923년 9월 3일, 후미코와 박열은 보호검속 명분으로 구속되고 10월 10일 치안경찰법 위반으로 기소된다. 1926년 3월 25일에는 사형선고를 받으며, 이후 무기징역으로 감형되지만 7월 23일 자살로 생을 마감하였다.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-title">목차</div>
+        <div class="toc-container">
+            <div class="toc-group">
+                <span class="toc-head">제1부 어린 시절</span>
+                <span class="toc-sub">아버지 / 어머니 / 고바야시의 고향 / 어머니의 친정</span>
+            </div>
+            <div class="toc-group">
+                <span class="toc-head">제2부 조선</span>
+                <span class="toc-sub">새로운 집 / 부강 / 이와시타 가문 / 조선 생활</span>
+            </div>
+            <div class="toc-group">
+                <span class="toc-head">제3부 다시 고향으로</span>
+                <span class="toc-sub">고향으로 돌아가다 / 호랑이 굴로 / 소용돌이치는 성 / 안녕히 계세요, 아버지</span>
+            </div>
+            <div class="toc-group">
+                <span class="toc-head">제4부 독립</span>
+                <span class="toc-sub">도쿄로 / 작은 외할아버지댁 / 신문팔이 / 노점상인 / 식모살이 / 거리의 방랑자 / 나 자신을 위한 일!</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-title">관련 영상</div>
+        <div class="video-column">
+            <div class="video-card">
+                <iframe src="https://www.youtube.com/embed/-ZFlJ5D67PU" title="KBS NEWS: 항일 불꽃 가네코 후미코" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+            <div class="video-card">
+                <iframe src="https://www.youtube.com/embed/bZTMg_zBX2g" title="박열과 가네코 후미코 재판 기록" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+</div>
+
+</body>
+</html>
