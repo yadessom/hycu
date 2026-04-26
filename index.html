@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Design Projects</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #ffffff;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            color: #0077b6;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .title-section::before {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: #0077b6;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .project-card {
+            display: flex;
+            align-items: center;
+            padding: 30px 40px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+            background-color: #fff;
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            border-color: #0077b6;
+        }
+
+        .project-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #0077b6;
+            margin-right: 40px;
+            line-height: 1;
+        }
+
+        .project-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .project-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .project-date {
+            font-size: 1rem;
+            color: #888;
+        }
+
+        @media (max-width: 600px) {
+            .project-card {
+                padding: 20px;
+            }
+            .project-number {
+                font-size: 2rem;
+                margin-right: 20px;
+            }
+            .project-name {
+                font-size: 1.1rem;
+            }
+            .project-date {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="title-section">WED DESIGN PROJECTS</div>
+        
+        <div class="project-list">
+            <a href="chara.html" target="_blank" class="project-card">
+                <div class="project-number">01</div>
+                <div class="project-info">
+                    <div class="project-name">캐릭터 사이트 제작하기</div>
+                    <div class="project-date">2026.03.09 00:00 ~ 2026.04.26 23:59</div>
+                </div>
+            </a>
+
+            <a href="book.html" target="_blank" class="project-card">
+                <div class="project-number">02</div>
+                <div class="project-info">
+                    <div class="project-name">HTML 활용하여 책 소개하기</div>
+                    <div class="project-date">2026.03.09 00:00 ~ 2026.04.26 23:59</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
