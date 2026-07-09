@@ -199,12 +199,10 @@
 
     // 1. 하이브리드 연동 핵심 감지 로직
     const checkEnvironmentAndInit = async () => {
-      // 샌드박스에서 자동 주입해주는 ID가 있으면 그걸 쓰고, 없으면 네 기본 ID를 고정할게
       appId = typeof __app_id !== 'undefined' ? __app_id : 'design-sprint-app';
       
-      let firebaseConfig = myFirebaseConfig; // 기본적으로 네 파이어베이스 설정을 바라보게 세팅
+      let firebaseConfig = myFirebaseConfig;
 
-      // 만약 임베디드 시뮬레이션 환경에서 다른 설정값이 주입된다면 그걸로 대체
       try {
         if (typeof __firebase_config !== 'undefined' && __firebase_config) {
           firebaseConfig = JSON.parse(__firebase_config);
@@ -222,7 +220,6 @@
           
           updateStatusBadge("🔑 클라우드 보안 토큰 로그인 중...", false);
 
-          // Rule 3: Firebase Auth 선행 절차 필수
           if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
             await signInWithCustomToken(auth, __initial_auth_token);
           } else {
@@ -233,10 +230,8 @@
             if (user) {
               updateStatusBadge("☁️ 실시간 클라우드 동기화 켜짐", true);
               
-              // Rule 1: 규정된 path를 정확히 사수함
               const tasksColRef = collection(db, 'artifacts', appId, 'public', 'data', 'tasks');
               
-              // Rule 2: 컴파일 및 인덱스 에러 방지를 위해 복잡한 쿼리(orderBy 등) 없이 로드
               onSnapshot(tasksColRef, (snapshot) => {
                 tasks = [];
                 snapshot.forEach((doc) => {
@@ -504,7 +499,7 @@
       document.getElementById('confirm-modal').classList.add('hidden');
     }
 
-    // 5. 서버/로컬 하이브리드 쓰기 및 삭제 작업
+    // 5. 서버/로컬 하이브리드 쓰기 및 삭제 작업 (모달 즉시 닫기 최적화)
     async function saveTask(e) {
       e.preventDefault();
       const id = document.getElementById('task-id').value || Date.now().toString();
@@ -526,18 +521,21 @@
         createdAt: createdAt
       };
 
+      // [핵심 수정] UI 반응성을 극대화하기 위해 모달을 즉시 닫고 시작해!
+      closeModal();
+
       if (isCloudMode && db) {
+        // 백그라운드 동기화와 동시에 로컬 스토어에 임시 선반영하여 반응성 챙기기
+        saveLocallyFallback(id, finalTask);
         try {
           const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tasks', id);
           await setDoc(docRef, finalTask);
         } catch (err) {
-          console.error("클라우드 저장 실패, 로컬 임시 저장합니다.", err);
-          saveLocallyFallback(id, finalTask);
+          console.error("클라우드 백그라운드 저장 실패, 로컬 데이터 유지됨.", err);
         }
       } else {
         saveLocallyFallback(id, finalTask);
       }
-      closeModal();
     }
 
     function saveLocallyFallback(id, finalTask) {
@@ -555,19 +553,21 @@
       const id = document.getElementById('task-id').value;
       if (!id) return;
 
+      // [핵심 수정] 지연 없는 부드러운 사용을 위해 즉시 팝업 창들부터 완전 봉인!
+      closeConfirmModal();
+      closeModal();
+
       if (isCloudMode && db) {
+        deleteLocallyFallback(id); // 즉각 로컬 리스트에서 제거해서 화면 리프레시
         try {
           const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tasks', id);
           await deleteDoc(docRef);
         } catch (err) {
-          console.error("클라우드 삭제 실패, 로컬에서 제거합니다.", err);
-          deleteLocallyFallback(id);
+          console.error("클라우드 백그라운드 삭제 실패, 로컬 제거 완료됨.", err);
         }
       } else {
         deleteLocallyFallback(id);
       }
-      closeConfirmModal();
-      closeModal();
     }
 
     function deleteLocallyFallback(id) {
