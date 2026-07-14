@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>디자인 스프린트 - 칸반 보드 Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { background-color: #191919; color: #e3e3e3; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #191919; }
+    ::-webkit-scrollbar-thumb { background: #373737; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4a4a4a; }
+    .kanban-col { min-height: 70vh; }
+    .drag-over { background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; }
+  </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex flex-col">
+
+  <header class="max-w-7xl mx-full mb-6">
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-1">
+      <div class="flex items-center space-x-2 text-2xl font-bold">
+        <span>🏃</span>
+        <h1>디자인 스프린트</h1>
+      </div>
+      <!-- 동기화 상태 뱃지 -->
+      <div id="sync-status" class="px-2.5 py-1 rounded text-xs font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700">
+        상태 확인 중...
+      </div>
+    </div>
+    <p class="text-gray-500 text-sm mb-6">클라우드 동기화와 실시간 공유가 완벽 지원되는 똑똑한 보드야.</p>
+
+    <!-- 검색 및 새로 만들기 헤더 영역 -->
+    <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center border-b border-[#2d2d2d] pb-4 gap-4">
+      <div class="flex items-center space-x-3 w-full sm:w-auto">
+        <div class="relative flex-grow sm:flex-grow-0">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-gray-500"></i>
+          <input type="text" id="search-input" placeholder="작업 검색..." oninput="renderBoard()" class="bg-[#202020] border border-[#2d2d2d] rounded-md pl-9 pr-4 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-gray-500 w-full sm:w-64">
+        </div>
+        <button onclick="openEditModal(null, 'before')" class="bg-[#2383e2] hover:bg-[#1a6ec2] text-white text-sm font-medium px-4 py-1.5 rounded-md flex items-center space-x-1 shrink-0 transition-colors">
+          <span>새로 만들기</span>
+          <i data-lucide="plus" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow overflow-x-auto">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 min-w-[1200px] h-full items-start" id="board-container">
+      <!-- 컬럼은 JS에서 렌더링됨 -->
+    </div>
+  </main>
+
+  <!-- 상세 편집 모달 -->
+  <div id="task-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-[#202020] border border-[#2d2d2d] w-full max-w-3xl rounded-lg shadow-2xl p-6 relative">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-300">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <h3 id="modal-title-text" class="text-lg font-semibold mb-4 text-gray-100">작업 편집</h3>
+
+      <form id="task-form" onsubmit="saveTask(event)" class="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <input type="hidden" id="task-id">
+        <input type="hidden" id="task-status">
+
+        <!-- 1. 좌측 상세 내용 편집 영역 -->
+        <div class="md:col-span-3 flex flex-col space-y-4">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">작업 제목</label>
+            <input type="text" id="task-title" required placeholder="무엇을 해야 하나요?" class="w-full bg-[#2d2d2d] border border-[#3d3d3d] rounded p-2 text-gray-200 focus:outline-none focus:border-gray-500">
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">메모</label>
+            <textarea id="task-memo" rows="6" placeholder="세부 내용을 자유롭게 기록하세요..." class="w-full bg-[#2d2d2d] border border-[#3d3d3d] rounded p-2 text-gray-200 focus:outline-none focus:border-gray-500 resize-none text-sm"></textarea>
+          </div>
+
+          <!-- 현재 선택 상태 표시 배지 -->
+          <div class="bg-[#1a1a1a] p-3 rounded border border-[#2d2d2d] text-xs">
+            <span class="text-gray-500 font-semibold block mb-1">선택된 마감일</span>
+            <span id="selected-date-status-badge" class="text-orange-400 font-medium">지정 안 됨 (우측 달력에서 선택 가능)</span>
+          </div>
+
+          <div id="creation-info" class="text-[11px] text-gray-500 mb-2 hidden">
+            <i data-lucide="calendar-plus" class="w-3 h-3 inline mr-1"></i> 작성 시간: <span id="created-at-display"></span>
+          </div>
+
+          <div class="flex justify-between items-center pt-4 border-t border-[#2d2d2d] mt-auto">
+            <button type="button" id="delete-btn" onclick="confirmDelete()" class="text-[#ff7373] text-sm px-2 py-1 hover:bg-[#441a1a] rounded transition-colors hidden">
+              페이지 삭제
+            </button>
+            <div class="flex space-x-2 ml-auto">
+              <button type="button" onclick="closeModal()" class="text-gray-400 text-sm px-4 py-1.5 rounded hover:bg-[#2d2d2d]">취소</button>
+              <button type="submit" class="bg-[#2383e2] hover:bg-[#1a6ec2] text-white text-sm px-6 py-1.5 rounded font-medium shadow-lg transition-all">저장하기</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 우측 인터랙티브 미니 달력 위젯 -->
+        <div class="md:col-span-2 bg-[#161616] p-4 rounded-lg border border-[#2e2e2e] flex flex-col space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">마감일 지정</span>
+            <button type="button" id="clear-date-btn" onclick="clearSelectedDate()" class="text-[10px] text-gray-500 hover:text-red-400 transition-colors hidden">선택 취소</button>
+          </div>
+
+          <!-- 달력 헤더 및 내비게이션 -->
+          <div class="flex justify-between items-center px-1">
+            <button type="button" onclick="changeCalendarMonth(-1)" class="text-gray-400 hover:text-white transition-colors p-1">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <span id="calendar-month-year" class="text-xs font-semibold text-gray-200"></span>
+            <button type="button" onclick="changeCalendarMonth(1)" class="text-gray-400 hover:text-white transition-colors p-1">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- 달력 일주일 헤더 -->
+          <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-gray-500 font-bold">
+            <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+          </div>
+
+          <!-- 달력 실시간 일자 그리드 -->
+          <div id="calendar-days-grid" class="grid grid-cols-7 gap-y-1 gap-x-1 justify-items-center">
+            <!-- JS dynamic loop -->
+          </div>
+
+          <!-- 시간 선택기 -->
+          <div class="border-t border-[#2d2d2d] pt-3">
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">상세 시간 설정</label>
+            <div class="flex items-center space-x-2">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-gray-500"></i>
+              <input type="time" id="calendar-time-picker" oninput="updateSelectedTime(this.value)" class="bg-[#2d2d2d] border border-[#3d3d3d] rounded p-1 text-xs text-gray-200 focus:outline-none focus:border-gray-500 flex-grow disabled:opacity-40 disabled:cursor-not-allowed">
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- 삭제 확인 커스텀 모달 -->
+  <div id="confirm-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-[60] p-4">
+    <div class="bg-[#252525] border border-[#3d3d3d] w-full max-w-sm rounded-lg shadow-2xl p-6 text-center">
+      <div class="flex justify-center mb-3 text-red-500">
+        <i data-lucide="alert-triangle" class="w-12 h-12"></i>
+      </div>
+      <h4 class="text-lg font-bold text-gray-100 mb-2">진짜 지우려고?</h4>
+      <p class="text-sm text-gray-400 mb-6">한 번 삭제하면 뼈 빠지게 적어둔 메모까지 싹 다 날아가는데 감당할 수 있겠어?</p>
+      
+      <div class="flex space-x-3 justify-center">
+        <button onclick="closeConfirmModal()" class="bg-[#2d2d2d] hover:bg-[#3d3d3d] text-gray-300 text-sm px-4 py-2 rounded transition-colors w-1/2">
+          안 지울래..
+        </button>
+        <button onclick="executeDelete()" class="bg-[#661e1e] hover:bg-[#882828] text-red-200 text-sm px-4 py-2 rounded font-medium transition-colors w-1/2">
+          응 지울래!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 에러 진단 전용 모달 (구글 서버의 날것 그대로의 분노를 중계해 드립니다) -->
+  <div id="error-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-[70] p-4">
+    <div class="bg-[#252525] border border-red-900 w-full max-w-md rounded-lg shadow-2xl p-6">
+      <div class="flex items-center space-x-3 text-red-500 mb-3">
+        <i data-lucide="shield-alert" class="w-8 h-8"></i>
+        <h4 class="text-lg font-bold text-gray-100">서버 통신 에러 발생!</h4>
+      </div>
+      <p class="text-sm text-gray-300 mb-4">구글 서버가 네 요청을 거절했어. 에러 내용은 다음과 같아:</p>
+      <div class="bg-[#191919] p-3 rounded border border-[#333] font-mono text-xs text-red-400 mb-4 overflow-x-auto break-all" id="error-log-text">
+        기다리는 중...
+      </div>
+      <p class="text-xs text-gray-400 mb-6">💡 <b>해결책:</b> 만약 "Missing or insufficient permissions"라고 뜨면 Firestore Database 메뉴의 <b>Rules(규칙)</b> 탭으로 가서 허용 설정을 한 뒤 꼭 <b>게시(Publish)</b> 버튼을 눌렀는지 체크해봐!</p>
+      <button onclick="closeErrorModal()" class="w-full bg-[#333] hover:bg-[#444] text-gray-200 py-2 rounded text-sm transition-colors">창 닫기</button>
+    </div>
+  </div>
+
+  <!-- Firebase 모듈을 로드하여 하이브리드 동기화 구현 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const columns = [
+      { id: 'before', label: '예정', bg: '#2d2d2d', text: '#9b9b9b' },
+      { id: 'priority', label: '최우선', bg: '#3f2222', text: '#ff7373' },
+      { id: 'progress', label: '진행 중', bg: '#3f3522', text: '#e3b565' },
+      { id: 'done', label: '완료', bg: '#1c382f', text: '#52ba90' },
+      { id: 'confirmed', label: '확정', bg: '#2d1c38', text: '#b878e3' }
+    ];
+
+    let tasks = [];
+    let isCloudMode = false;
+    let db = null;
+    let auth = null;
+    let appId = 'design-sprint-app';
+
+    // 네가 들고 온 소중한 개인 Firebase 설정값!
+    const myFirebaseConfig = {
+      apiKey: "AIzaSyB0m3NB7sytkeTfE-dcBJ1o1CJKLQwJdSk",
+      authDomain: "design-sprint-85677.firebaseapp.com",
+      projectId: "design-sprint-85677",
+      storageBucket: "design-sprint-85677.firebasestorage.app",
+      messagingSenderId: "676999620649",
+      appId: "1:676999620649:web:1d06910b122f5c63031438",
+      measurementId: "G-G31DEWVXSR"
+    };
+
+    // 전역 달력 컨트롤 상태
+    let currentCalendarYear = new Date().getFullYear();
+    let currentCalendarMonth = new Date().getMonth();
+    let selectedDateStr = null;
+    let selectedTimeStr = "09:00";
+
+    // 1. 하이브리드 연동 핵심 감지 로직
+    const checkEnvironmentAndInit = async () => {
+      appId = typeof __app_id !== 'undefined' ? __app_id : 'design-sprint-app';
+      
+      let firebaseConfig = myFirebaseConfig;
+
+      try {
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+          firebaseConfig = JSON.parse(__firebase_config);
+        }
+      } catch (e) {
+        console.error("Firebase config parse error", e);
+      }
+
+      if (firebaseConfig) {
+        try {
+          const app = initializeApp(firebaseConfig);
+          auth = getAuth(app);
+          db = getFirestore(app);
+          isCloudMode = true;
+          
+          updateStatusBadge("🔑 클라우드 로그인 연결 중...", false);
+
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              updateStatusBadge("☁️ 실시간 클라우드 동기화 켜짐", true);
+              
+              const tasksColRef = collection(db, 'artifacts', appId, 'public', 'data', 'tasks');
+              
+              // 실시간 동기화 리스너 바인딩
+              onSnapshot(tasksColRef, (snapshot) => {
+                tasks = [];
+                snapshot.forEach((doc) => {
+                  tasks.push({ id: doc.id, ...doc.data() });
+                });
+                renderBoard(); // 데이터 들어오면 새로 고침
+              }, (error) => {
+                console.error("Firestore sync error", error);
+                updateStatusBadge("⚠️ 보안 정책 오류 (로컬 모드 전환)", false);
+                fallbackToLocal();
+              });
+
+            } else {
+              fallbackToLocal();
+            }
+          });
+
+        } catch (err) {
+          console.error("Firebase init failed, fallback to local storage", err);
+          fallbackToLocal();
+        }
+      } else {
+        fallbackToLocal();
+      }
+    };
+
+    function fallbackToLocal() {
+      isCloudMode = false;
+      tasks = JSON.parse(localStorage.getItem('notion_tasks_v3')) || [];
+      updateStatusBadge("💾 인터넷 공유 불가 (로컬 저장 중)", false);
+      renderBoard();
+    }
+
+    function updateStatusBadge(statusText, isConnected, isError = false) {
+      const badge = document.getElementById('sync-status');
+      if (!badge) return;
+      badge.innerText = statusText;
+      if (isError) {
+        badge.className = "px-2.5 py-1 rounded text-xs font-semibold bg-red-950 text-red-400 border border-red-900 animate-pulse";
+      } else if (isConnected) {
+        badge.className = "px-2.5 py-1 rounded text-xs font-semibold bg-emerald-950 text-emerald-400 border border-emerald-900";
+      } else {
+        badge.className = "px-2.5 py-1 rounded text-xs font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700";
+      }
+    }
+
+    // 2. 칸반 보드 렌더링
+    function renderBoard() {
+      const container = document.getElementById('board-container');
+      container.innerHTML = '';
+      const searchQuery = document.getElementById('search-input').value.toLowerCase();
+
+      columns.forEach(col => {
+        const colTasks = tasks.filter(t => t.status === col.id && t.title.toLowerCase().includes(searchQuery));
+        
+        const colHtml = `
+          <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between mb-3 px-1">
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-0.5 rounded text-xs font-semibold" style="background-color: ${col.bg}; color: ${col.text}">${col.label}</span>
+                <span class="text-xs text-gray-500">${colTasks.length}</span>
+              </div>
+              <button onclick="openEditModal(null, '${col.id}')" class="text-gray-500 hover:text-gray-300"><i data-lucide="plus" class="w-4 h-4"></i></button>
+            </div>
+            
+            <div id="col-${col.id}" data-status="${col.id}" class="kanban-col flex-grow flex flex-col gap-2 pb-10" 
+                 ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event)">
+              ${colTasks.map(task => `
+                <div id="task-${task.id}" class="bg-[#202020] border border-[#2d2d2d] rounded-md p-3.5 shadow-sm cursor-grab active:cursor-grabbing hover:border-gray-600 transition-all group" 
+                     draggable="true" ondragstart="dragStart(event, '${task.id}')" onclick="openEditModal('${task.id}')">
+                  
+                  <div class="flex items-start">
+                    <span class="text-sm font-medium text-gray-200 group-hover:text-white leading-tight break-all">${task.title}</span>
+                  </div>
+                  
+                  ${task.dueDate ? `
+                    <div class="mt-2 text-[10px] text-orange-400 flex items-center">
+                      <i data-lucide="calendar" class="w-3 h-3 mr-1 text-orange-400"></i>
+                      마감: ${formatDateTime(task.dueDate)}
+                    </div>
+                  ` : ''}
+
+                  <div class="mt-2.5 flex items-center justify-between border-t border-[#2d2d2d] pt-2">
+                    <div class="text-[9px] text-gray-600 flex items-center">
+                      <i data-lucide="clock" class="w-2.5 h-2.5 mr-1"></i>
+                      등록: ${formatDateTime(task.createdAt)}
+                    </div>
+                    ${task.memo ? '<i data-lucide="align-left" class="w-3 h-3 text-gray-500" title="메모 있음"></i>' : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', colHtml);
+      });
+      lucide.createIcons();
+    }
+
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    // 3. 미니 달력 렌더링 로직
+    function renderMiniCalendar() {
+      const year = currentCalendarYear;
+      const month = currentCalendarMonth;
+      
+      document.getElementById('calendar-month-year').innerText = `${year}년 ${month + 1}월`;
+      
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      const prevLastDay = new Date(year, month, 0).getDate();
+      
+      let daysHtml = '';
+      
+      for (let x = firstDayIndex; x > 0; x--) {
+        daysHtml += `<div class="text-gray-700 text-[10px] p-1 text-center select-none opacity-20">${prevLastDay - x + 1}</div>`;
+      }
+      
+      for (let i = 1; i <= lastDay; i++) {
+        const currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+        const isSelected = (selectedDateStr === currentDateStr);
+        
+        let dayClass = 'hover:bg-[#2d2d2d] text-gray-300 rounded-full cursor-pointer';
+        if (isSelected) {
+          dayClass = 'bg-[#2383e2] text-white font-bold rounded-full';
+        }
+        
+        daysHtml += `
+          <div onclick="toggleCalendarDate('${currentDateStr}')" 
+               class="text-xs w-7 h-7 flex items-center justify-center select-none ${dayClass} transition-colors mx-auto">
+            ${i}
+          </div>
+        `;
+      }
+      
+      const totalCells = firstDayIndex + lastDay;
+      const nextDays = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      for (let j = 1; j <= nextDays; j++) {
+        daysHtml += `<div class="text-gray-700 text-[10px] p-1 text-center select-none opacity-20">${j}</div>`;
+      }
+      
+      document.getElementById('calendar-days-grid').innerHTML = daysHtml;
+      
+      const timePicker = document.getElementById('calendar-time-picker');
+      if (selectedDateStr) {
+        timePicker.disabled = false;
+        timePicker.value = selectedTimeStr;
+      } else {
+        timePicker.disabled = true;
+        timePicker.value = '';
+      }
+    }
+
+    function toggleCalendarDate(dateStr) {
+      if (selectedDateStr === dateStr) {
+        clearSelectedDate();
+      } else {
+        selectedDateStr = dateStr;
+        updateSelectedDateDisplay();
+        renderMiniCalendar();
+      }
+    }
+
+    function clearSelectedDate() {
+      selectedDateStr = null;
+      updateSelectedDateDisplay();
+      renderMiniCalendar();
+    }
+
+    function updateSelectedTime(val) {
+      selectedTimeStr = val || "09:00";
+      updateSelectedDateDisplay();
+    }
+
+    function updateSelectedDateDisplay() {
+      const badge = document.getElementById('selected-date-status-badge');
+      const clearBtn = document.getElementById('clear-date-btn');
+      
+      if (selectedDateStr) {
+        badge.innerText = `${selectedDateStr.replace(/-/g, '.')} ${selectedTimeStr}`;
+        badge.className = "text-emerald-400 font-semibold";
+        clearBtn.classList.remove('hidden');
+      } else {
+        badge.innerText = "지정 안 됨 (우측 달력에서 선택 가능)";
+        badge.className = "text-orange-400 font-medium";
+        clearBtn.classList.add('hidden');
+      }
+    }
+
+    function changeCalendarMonth(offset) {
+      currentCalendarMonth += offset;
+      if (currentCalendarMonth < 0) {
+        currentCalendarMonth = 11;
+        currentCalendarYear--;
+      } else if (currentCalendarMonth > 11) {
+        currentCalendarMonth = 0;
+        currentCalendarYear++;
+      }
+      renderMiniCalendar();
+    }
+
+    // 4. 모달 제어 및 데이터 통합처리
+    function openEditModal(taskId = null, defaultStatus = 'before') {
+      const modal = document.getElementById('task-modal');
+      const form = document.getElementById('task-form');
+      const creationInfo = document.getElementById('creation-info');
+      form.reset();
+      
+      if (taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        document.getElementById('modal-title-text').innerText = "페이지 편집";
+        document.getElementById('task-id').value = task.id;
+        document.getElementById('task-status').value = task.status;
+        document.getElementById('task-title').value = task.title;
+        document.getElementById('task-memo').value = task.memo || '';
+        document.getElementById('created-at-display').innerText = formatDateTime(task.createdAt);
+        
+        if (task.dueDate) {
+          const dt = new Date(task.dueDate);
+          currentCalendarYear = dt.getFullYear();
+          currentCalendarMonth = dt.getMonth();
+          selectedDateStr = `${currentCalendarYear}-${String(currentCalendarMonth+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+          selectedTimeStr = `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+        } else {
+          currentCalendarYear = new Date().getFullYear();
+          currentCalendarMonth = new Date().getMonth();
+          selectedDateStr = null;
+          selectedTimeStr = "09:00";
+        }
+
+        creationInfo.classList.remove('hidden');
+        document.getElementById('delete-btn').classList.remove('hidden');
+      } else {
+        document.getElementById('modal-title-text').innerText = "새 페이지 만들기";
+        document.getElementById('task-id').value = '';
+        document.getElementById('task-status').value = defaultStatus;
+        
+        currentCalendarYear = new Date().getFullYear();
+        currentCalendarMonth = new Date().getMonth();
+        selectedDateStr = null;
+        selectedTimeStr = "09:00";
+
+        creationInfo.classList.add('hidden');
+        document.getElementById('delete-btn').classList.add('hidden');
+      }
+
+      updateSelectedDateDisplay();
+      renderMiniCalendar();
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      document.getElementById('task-modal').classList.add('hidden');
+    }
+
+    function confirmDelete() {
+      document.getElementById('confirm-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirm-modal').classList.add('hidden');
+    }
+
+    // 에러 진단 모달 열기
+    function showErrorModal(err) {
+      document.getElementById('error-log-text').innerText = err.toString();
+      document.getElementById('error-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeErrorModal() {
+      document.getElementById('error-modal').classList.add('hidden');
+    }
+
+    // 5. 서버/로컬 하이브리드 쓰기 및 삭제 작업 (모달 즉시 닫기 최적화)
+    async function saveTask(e) {
+      e.preventDefault();
+      const id = document.getElementById('task-id').value || Date.now().toString();
+      const status = document.getElementById('task-status').value;
+      const combinedDueDate = selectedDateStr ? `${selectedDateStr}T${selectedTimeStr}` : '';
+
+      const taskData = {
+        title: document.getElementById('task-title').value,
+        dueDate: combinedDueDate,
+        memo: document.getElementById('task-memo').value,
+        status: status
+      };
+
+      const existingTask = tasks.find(t => t.id === id);
+      const createdAt = existingTask ? existingTask.createdAt : new Date().toISOString();
+
+      const finalTask = {
+        ...taskData,
+        createdAt: createdAt
+      };
+
+      // 모달 즉시 닫기
+      closeModal();
+
+      if (isCloudMode && db) {
+        // 로컬에 우선 선반영하여 반응성 챙김
+        saveLocallyFallback(id, finalTask);
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tasks', id);
+          await setDoc(docRef, finalTask);
+        } catch (err) {
+          console.error("클라우드 백그라운드 저장 실패", err);
+          updateStatusBadge("⚠️ 저장 실패! 규칙(Rules) 확인 필요", false, true);
+          showErrorModal(err);
+        }
+      } else {
+        saveLocallyFallback(id, finalTask);
+      }
+    }
+
+    function saveLocallyFallback(id, finalTask) {
+      const idx = tasks.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        tasks[idx] = { id, ...finalTask };
+      } else {
+        tasks.push({ id, ...finalTask });
+      }
+      localStorage.setItem('notion_tasks_v3', JSON.stringify(tasks));
+      renderBoard();
+    }
+
+    async function executeDelete() {
+      const id = document.getElementById('task-id').value;
+      if (!id) return;
+
+      closeConfirmModal();
+      closeModal();
+
+      if (isCloudMode && db) {
+        deleteLocallyFallback(id); // 즉각 치우기
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tasks', id);
+          await deleteDoc(docRef);
+        } catch (err) {
+          console.error("클라우드 백그라운드 삭제 실패", err);
+          updateStatusBadge("⚠️ 삭제 실패! 규칙(Rules) 확인 필요", false, true);
+          showErrorModal(err);
+        }
+      } else {
+        deleteLocallyFallback(id);
+      }
+    }
+
+    function deleteLocallyFallback(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      localStorage.setItem('notion_tasks_v3', JSON.stringify(tasks));
+      renderBoard();
+    }
+
+    // 6. 드래그 앤 드롭 동기화 처리
+    function dragStart(e, id) {
+      e.dataTransfer.setData('text/plain', id);
+      setTimeout(() => e.target.classList.add('opacity-40'), 0);
+    }
+    function allowDrop(e) { e.preventDefault(); }
+    function dragEnter(e) { e.currentTarget.classList.add('drag-over'); }
+    function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+    
+    async function drop(e) {
+      e.preventDefault();
+      const col = e.currentTarget;
+      col.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('text/plain');
+      const task = tasks.find(t => t.id === id);
+      if (task && task.status !== col.dataset.status) {
+        const oldStatus = task.status;
+        task.status = col.dataset.status;
+
+        if (isCloudMode && db) {
+          try {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tasks', id);
+            await setDoc(docRef, { status: task.status }, { merge: true });
+          } catch (err) {
+            console.error("드래그 클라우드 동기화 실패", err);
+            updateStatusBadge("⚠️ 드래그 동기화 실패!", false, true);
+            showErrorModal(err);
+            task.status = oldStatus;
+            renderBoard();
+          }
+        } else {
+          localStorage.setItem('notion_tasks_v3', JSON.stringify(tasks));
+          renderBoard();
+        }
+      }
+    }
+
+    // 전역 스크립트 모듈 바인딩 (인라인 HTML 이벤트용)
+    window.openEditModal = openEditModal;
+    window.closeModal = closeModal;
+    window.confirmDelete = confirmDelete;
+    window.closeConfirmModal = closeConfirmModal;
+    window.executeDelete = executeDelete;
+    window.saveTask = saveTask;
+    window.renderBoard = renderBoard;
+    window.changeCalendarMonth = changeCalendarMonth;
+    window.toggleCalendarDate = toggleCalendarDate;
+    window.clearSelectedDate = clearSelectedDate;
+    window.updateSelectedTime = updateSelectedTime;
+    window.dragStart = dragStart;
+    window.allowDrop = allowDrop;
+    window.dragEnter = dragEnter;
+    window.dragLeave = dragLeave;
+    window.drop = drop;
+    window.closeErrorModal = closeErrorModal;
+
+    // 초기 시작 로직 (즉각 예정-완료 카테고리부터 보장!)
+    window.onload = () => {
+      renderBoard(); 
+      checkEnvironmentAndInit();
+    };
+  </script>
+</body>
+</html>
