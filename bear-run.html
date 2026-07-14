@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>지옥의 구꼬미 런</title>
+  <!-- Tailwind CSS & FontAwesome for Premium UI -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-drag: none; }
+    body { background-color: #030a08; font-family: 'Pretendard', system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; color: #f8fafc; touch-action: manipulation; }
+    #game-wrapper { position: relative; width: 95vw; max-width: 960px; aspect-ratio: 16/9; background-color: #03140f; border-radius: 24px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85); border: 4px solid #0a2f24; }
+    canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+    .ui-screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(3, 15, 12, 0.9); backdrop-filter: blur(8px); transition: all 0.3s ease; opacity: 0; pointer-events: none; z-index: 10; }
+    .ui-screen.active { opacity: 1; pointer-events: auto; }
+    .btn-premium { background: linear-gradient(135deg, #10b981 0%, #047857 100%); color: white; font-weight: 800; font-size: 1.1rem; padding: 0.8rem 2.2rem; border-radius: 9999px; border: 2px solid #d1fae5; box-shadow: 0 10px 20px -3px rgba(16, 185, 129, 0.4); cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(1); }
+    .btn-premium:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 15px 25px -3px rgba(16, 185, 129, 0.6); }
+    .btn-premium:active { transform: scale(0.95) translateY(0); }
+    .jump-btn { position: absolute; bottom: 24px; right: 24px; width: 80px; height: 80px; border-radius: 50%; background: rgba(16, 185, 129, 0.25); border: 3px solid rgba(16, 185, 129, 0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 0.85rem; cursor: pointer; backdrop-filter: blur(6px); z-index: 5; transition: all 0.1s ease; outline: none; -webkit-tap-highlight-color: transparent; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+    .jump-btn:active { transform: scale(0.88); background: rgba(16, 185, 129, 0.6); box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+    .info-panel { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; font-weight: 800; z-index: 5; pointer-events: none; }
+    .info-badge { background: rgba(4, 20, 16, 0.85); padding: 0.5rem 1rem; border-radius: 14px; border: 1.5px solid rgba(255, 255, 255, 0.15); font-size: 0.95rem; backdrop-filter: blur(6px); display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    #screen-rotate { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; background: #010705; z-index: 999; color: #f8fafc; text-align: center; padding: 2rem; }
+    @media (orientation: portrait) and (max-width: 1024px) { #screen-rotate { display: flex; } }
+    @keyframes phoneRotate { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
+    .animate-rotate { animation: phoneRotate 2s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+
+  <!-- 모바일 세로 모드 경고 오버레이 -->
+  <div id="screen-rotate">
+    <div class="text-center">
+      <div class="inline-block mb-6 text-emerald-400 text-6xl animate-rotate">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+      </div>
+      <h3 class="text-xl font-bold text-emerald-400 mb-2">화면을 가로로 돌려줘!</h3>
+      <p class="text-gray-400 text-xs leading-relaxed max-w-xs mx-auto">
+        구꼬미의 모험은 넓은 가로 화면에서만 시작할 수 있어.<br>
+        기기 회전 잠금을 끄고 폰을 눕혀보자!
+      </p>
+    </div>
+  </div>
+
+  <div id="game-wrapper">
+    <!-- 실시간 인포 패널 -->
+    <div class="info-panel">
+      <div class="info-badge text-emerald-400">
+        <i class="fa-solid fa-stopwatch animate-pulse"></i>
+        <span>SURVIVED: <span id="live-time">0.00</span>s</span>
+      </div>
+      <div class="info-badge text-yellow-400">
+        <i class="fa-solid fa-trophy"></i>
+        <span>BEST: <span id="best-time">0.00</span>s</span>
+      </div>
+    </div>
+
+    <!-- 모바일/마우스용 점프 버튼 -->
+    <button class="jump-btn" id="btn-jump-action">
+      <i class="fa-solid fa-angles-up text-sm mb-1"></i>
+      <span>JUMP</span>
+    </button>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- 시작 화면 -->
+    <div id="screen-start" class="ui-screen active">
+      <div class="text-center px-6">
+        <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-500 to-emerald-300 mb-4 tracking-tight drop-shadow-lg">
+          지옥의 구꼬미 런
+        </h1>
+        <p class="text-gray-300 text-base md:text-lg mb-8 max-w-md mx-auto leading-relaxed">
+          귀여운 구꼬미가 깊고 신비로운 초록 숲에 길을 잃었어!<br>
+          오른쪽으로 신나게 달리며 습격하는 불길을 피해 안전하게 지켜줘!
+        </p>
+        <button class="btn-premium" id="btn-start">
+          <i class="fa-solid fa-play mr-2"></i> 모험 시작하기
+        </button>
+        <div class="mt-8 text-xs text-gray-500 flex flex-col items-center gap-1">
+          <span><kbd class="px-2 py-1 bg-gray-800 rounded border border-gray-700">Spacebar</kbd> 또는 <kbd class="px-2 py-1 bg-gray-800 rounded border border-gray-700">화면 터치(JUMP)</kbd>로 점프</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 게임 오버 화면 -->
+    <div id="screen-gameover" class="ui-screen">
+      <div class="text-center px-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-950/50 rounded-full border border-emerald-500 mb-6 text-emerald-400 text-3xl animate-bounce">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-black text-emerald-400 mb-2 uppercase tracking-wide">
+          GAME OVER
+        </h2>
+        <p class="text-gray-300 text-sm mb-6" id="gameover-encouragement">
+          조금만 더 집중하면 훨씬 높이 뛸 수 있을 거야! 화이팅!
+        </p>
+        
+        <div class="bg-gray-950/80 border border-emerald-950 p-5 rounded-2xl mb-8 max-w-sm mx-auto shadow-2xl">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-gray-400 text-sm">최종 생존 시간</span>
+            <span class="text-xl font-black text-emerald-400" id="final-time">0.00s</span>
+          </div>
+          <div class="flex justify-between items-center border-t border-emerald-900 pt-3">
+            <span class="text-gray-400 text-sm">개인 최고 기록</span>
+            <span class="text-lg font-bold text-yellow-400" id="final-best">0.00s</span>
+          </div>
+        </div>
+
+        <button class="btn-premium" id="btn-restart">
+          <i class="fa-solid fa-rotate-right mr-2"></i> 다시 도전하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // 고해상도 렌더링 세팅
+    const BASE_WIDTH = 960;
+    const BASE_HEIGHT = 540;
+    canvas.width = BASE_WIDTH;
+    canvas.height = BASE_HEIGHT;
+
+    // 외부 절대 경로 이미지 프리로드 리스트
+    const imgSources = {
+      '01': 'https://www.thegardenofeverything.com/img/01.png',
+      '02': 'https://www.thegardenofeverything.com/img/02.png',
+      '03': 'https://www.thegardenofeverything.com/img/03.png',
+      '04': 'https://www.thegardenofeverything.com/img/04.png',
+      '05': 'https://www.thegardenofeverything.com/img/05.png',
+      'fire': 'https://www.thegardenofeverything.com/img/fire.png'
+    };
+    const images = {};
+    let imagesLoaded = false;
+    let loadedCount = 0;
+
+    // 따뜻하고 긍정적인 응원 멘트 리스트
+    const encouragements = [
+      "구꼬미를 위해 한 번만 더 힘내보자! 넌 할 수 있어!",
+      "구꼬미와 함께 푸른 숲을 더 멀리 달려보자!",
+      "타이밍에 맞춰 스페이스바를 톡 누르면 가뿐하게 피할 수 있어!",
+      "구꼬미의 점프력은 굉장해! 다음 점프는 더 완벽할 거야.",
+      "환상적인 푸른 숲을 배경으로 다시 한번 도전해 볼까?",
+      "정말 멋진 도전이었어! 구꼬미는 네 터치를 믿고 있단다."
+    ];
+
+    // 이미지 로딩 핸들러
+    for (let key in imgSources) {
+      const img = new Image();
+      img.src = imgSources[key];
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === Object.keys(imgSources).length) imagesLoaded = true;
+      };
+      img.onerror = () => {
+        loadedCount++;
+        if (loadedCount === Object.keys(imgSources).length) imagesLoaded = true;
+      };
+      images[key] = img;
+    }
+
+    // 게임 상태 관리
+    let gameState = 'START';
+    let startTime = 0;
+    let elapsedRealTime = 0;
+    let bestTime = parseFloat(localStorage.getItem('gukkomi_best_time')) || 0;
+    document.getElementById('best-time').innerText = bestTime.toFixed(2);
+
+    // 파티클 시스템 (흙 먼지 및 나뭇잎 이펙트)
+    let particles = [];
+    function createRunParticle(x, y) {
+      particles.push({
+        x: x, y: y,
+        vx: -(Math.random() + 0.2) * 2.5,
+        vy: -Math.random() * 2,
+        size: Math.random() * 4 + 2,
+        color: 'rgba(52, 211, 153, 0.35)',
+        life: 1.0, decay: Math.random() * 0.04 + 0.02
+      });
+    }
+
+    function createFireExplosion(x, y) {
+      for (let i = 0; i < 35; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 8 + 4;
+        particles.push({
+          x: x, y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1,
+          size: Math.random() * 6 + 3,
+          color: Math.random() > 0.4 ? '#ff6b6b' : '#ffa94d',
+          life: 1.0, decay: Math.random() * 0.03 + 0.02
+        });
+      }
+    }
+
+    // 신비로운 숲 테마를 위해 떠다니는 초록 나뭇잎 파티클
+    let leaves = [];
+    function updateLeaves() {
+      if (gameState === 'PLAYING' && Math.random() < 0.05) {
+        leaves.push({
+          x: BASE_WIDTH + 20,
+          y: Math.random() * (BASE_HEIGHT - 120),
+          speed: Math.random() * 1.5 + 1.5,
+          angle: Math.random() * Math.PI * 2,
+          spin: Math.random() * 0.04 - 0.02,
+          size: Math.random() * 5 + 4
+        });
+      }
+
+      for (let i = leaves.length - 1; i >= 0; i--) {
+        const lf = leaves[i];
+        lf.x -= lf.speed;
+        lf.y += Math.sin(lf.angle) * 0.5;
+        lf.angle += lf.spin;
+
+        if (lf.x < -20) {
+          leaves.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.translate(lf.x, lf.y);
+        ctx.rotate(lf.angle);
+        ctx.fillStyle = '#10b981';
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, lf.size, lf.size * 0.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // 게임 객체 정의
+    const groundY = BASE_HEIGHT - 80;
+    
+    // 구꼬미 (플레이어) - 120x152 영역 내에 완벽 렌더링
+    const bear = {
+      x: 100, 
+      y: groundY - 152,
+      width: 120,
+      height: 152,
+      vy: 0,
+      gravity: 0.65, 
+      jumpForce: -15.0, 
+      isGrounded: false,
+      runFrames: ['01', '02', '03', '04', '05'],
+      currentFrameIdx: 0,
+      animTimer: 0,
+      animSpeed: 5,
+      jump() {
+        if (this.isGrounded) {
+          this.vy = this.jumpForce;
+          this.isGrounded = false;
+          for (let i = 0; i < 10; i++) {
+            createRunParticle(this.x + this.width / 2, groundY);
+          }
+        }
+      },
+      getRenderBounds() {
+        let imgKey = this.runFrames[this.currentFrameIdx];
+        if (gameState === 'GAMEOVER') {
+          imgKey = 'fire';
+        } else if (!this.isGrounded) {
+          imgKey = '02';
+        }
+
+        const img = images[imgKey];
+        let drawW = this.width;
+        let drawH = this.height;
+
+        if (img && img.complete && img.naturalWidth !== 0) {
+          const imageRatio = img.naturalWidth / img.naturalHeight;
+          drawH = this.height;
+          drawW = this.height * imageRatio;
+        }
+
+        const drawX = this.x + (this.width - drawW) / 2;
+        const drawY = this.y;
+
+        return { x: drawX, y: drawY, width: drawW, height: drawH };
+      },
+      update() {
+        this.vy += this.gravity;
+        this.y += this.vy;
+
+        if (this.y + this.height >= groundY) {
+          this.y = groundY - this.height;
+          this.vy = 0;
+          if (!this.isGrounded) {
+            this.isGrounded = true;
+            for (let i = 0; i < 6; i++) createRunParticle(this.x + this.width / 2, groundY);
+          }
+        }
+
+        if (gameState === 'PLAYING') {
+          this.animTimer++;
+          if (this.animTimer >= this.animSpeed) {
+            this.animTimer = 0;
+            this.currentFrameIdx = (this.currentFrameIdx + 1) % this.runFrames.length;
+          }
+          if (this.isGrounded && Math.random() < 0.4) {
+            createRunParticle(this.x + 30, groundY - 5);
+          }
+        }
+      },
+      draw() {
+        ctx.save();
+        
+        let imgKey = this.runFrames[this.currentFrameIdx];
+        if (gameState === 'GAMEOVER') {
+          imgKey = 'fire';
+        } else if (!this.isGrounded) {
+          imgKey = '02';
+        }
+
+        const img = images[imgKey];
+        const bounds = this.getRenderBounds();
+
+        if (img && img.complete && img.naturalWidth !== 0) {
+          ctx.translate(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+          ctx.scale(-1, 1);
+          ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, -bounds.width / 2, -bounds.height / 2, bounds.width, bounds.height);
+        } else {
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 14px sans-serif';
+          ctx.fillText('구꼬미', bounds.x + bounds.width/2 - 20, bounds.y + bounds.height/2);
+        }
+
+        ctx.restore();
+      }
+    };
+
+    // 장애물 (불덩이) 배열
+    let obstacles = [];
+    let nextObstacleTimer = 0;
+
+    function spawnObstacle() {
+      const speedMultiplier = 1 + elapsedRealTime * 0.05;
+      const baseSpeed = 5.2;
+      const obstacleSpeed = (baseSpeed + Math.random() * 3.8) * speedMultiplier;
+
+      obstacles.push({
+        x: BASE_WIDTH + 60, 
+        y: groundY - 50,
+        width: 40,
+        height: 50,
+        speed: obstacleSpeed,
+        flameTime: Math.random() * 100
+      });
+    }
+
+    // 배경 스크롤 오프셋
+    let bgOffsetFar = 0;
+    let bgOffsetMid = 0;
+    let bgOffsetGround = 0;
+
+    function drawBackground() {
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
+      skyGrad.addColorStop(0, '#011510');
+      skyGrad.addColorStop(1, '#052c20');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+      ctx.fillStyle = '#041f17';
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      for (let i = 0; i <= BASE_WIDTH; i += 10) {
+        const yVal = groundY - (Math.sin((i + bgOffsetFar) * 0.005) * 50 + 170);
+        ctx.lineTo(i, yVal);
+      }
+      ctx.lineTo(BASE_WIDTH, groundY);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#06291e';
+      for (let i = 0; i <= BASE_WIDTH + 150; i += 120) {
+        const x = i - (bgOffsetMid % 120);
+        ctx.fillRect(x + 44, groundY - 140, 12, 140);
+        for (let layer = 0; layer < 4; layer++) {
+          const layerY = groundY - 140 - layer * 25;
+          const layerWidth = 80 - layer * 18;
+          ctx.beginPath();
+          ctx.moveTo(x + 50 - layerWidth / 2, layerY + 25);
+          ctx.lineTo(x + 50, layerY);
+          ctx.lineTo(x + 50 + layerWidth / 2, layerY + 25);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
+      ctx.fillStyle = '#031a13';
+      for (let i = 0; i <= BASE_WIDTH + 200; i += 180) {
+        const x = i - (bgOffsetGround * 0.65 % 180);
+        ctx.fillRect(x + 75, groundY - 320, 24, 320);
+        ctx.beginPath();
+        ctx.arc(x + 87, groundY - 320, 65, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#11221a';
+      ctx.fillRect(0, groundY, BASE_WIDTH, BASE_HEIGHT - groundY);
+
+      ctx.fillStyle = '#0f6e52';
+      ctx.fillRect(0, groundY, BASE_WIDTH, 12);
+
+      ctx.fillStyle = '#0d5c44';
+      for (let i = 0; i < BASE_WIDTH + 100; i += 80) {
+        const x = i - (bgOffsetGround % 80);
+        ctx.beginPath();
+        ctx.moveTo(x, groundY);
+        ctx.quadraticCurveTo(x + 12, groundY - 12, x + 24, groundY);
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.lineTo(BASE_WIDTH, groundY);
+      ctx.stroke();
+    }
+
+    function drawObstacle(obs) {
+      obs.flameTime += 0.15;
+      const x = obs.x;
+      const y = obs.y;
+      const w = obs.width;
+      const h = obs.height;
+
+      ctx.save();
+      ctx.translate(x, y);
+
+      const glowGrad = ctx.createRadialGradient(w/2, h, 5, w/2, h, w * 1.5);
+      glowGrad.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
+      glowGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(w/2, h, w * 1.5, 0, Math.PI, true);
+      ctx.fill();
+
+      const flicker = Math.sin(obs.flameTime) * 6;
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(w / 2, 0 - flicker);
+      ctx.bezierCurveTo(w * 1.3, h * 0.3, w * 1.1, h, w / 2, h);
+      ctx.bezierCurveTo(-w * 0.1, h, -w * 0.3, h * 0.3, w / 2, 0 - flicker);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.moveTo(w / 2, h * 0.3 - flicker * 0.7);
+      ctx.bezierCurveTo(w * 1.0, h * 0.5, w * 0.9, h, w / 2, h);
+      ctx.bezierCurveTo(w * 0.1, h, 0, h * 0.5, w / 2, h * 0.3 - flicker * 0.7);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.moveTo(w / 2, h * 0.6);
+      ctx.bezierCurveTo(w * 0.7, h * 0.7, w * 0.7, h, w / 2, h);
+      ctx.bezierCurveTo(w * 0.3, h, w * 0.3, h * 0.7, w / 2, h * 0.6);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function updateAndDrawParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= p.decay;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      }
+    }
+
+    function checkCollision(bearObj, rect2) {
+      const bounds = bearObj.getRenderBounds();
+      const hitboxW = bounds.width * 0.45; 
+      const hitboxH = bounds.height * 0.75;
+      const hitboxX = bounds.x + (bounds.width - hitboxW) / 2;
+      const hitboxY = bounds.y + (bounds.height - hitboxH);
+
+      return (
+        hitboxX < rect2.x + rect2.width &&
+        hitboxX + hitboxW > rect2.x &&
+        hitboxY < rect2.y + rect2.height &&
+        hitboxY + hitboxH > rect2.y
+      );
+    }
+
+    let shakeIntensity = 0;
+    function applyScreenShake() {
+      if (shakeIntensity > 0) {
+        const dx = (Math.random() - 0.5) * shakeIntensity;
+        const dy = (Math.random() - 0.5) * shakeIntensity;
+        ctx.translate(dx, dy);
+        shakeIntensity *= 0.9;
+        if (shakeIntensity < 0.2) shakeIntensity = 0;
+      }
+    }
+
+    function update() {
+      if (gameState === 'PLAYING') {
+        const currentTime = performance.now();
+        elapsedRealTime = (currentTime - startTime) / 1000;
+        document.getElementById('live-time').innerText = elapsedRealTime.toFixed(2);
+
+        const scrollSpeed = 5.5 + elapsedRealTime * 0.15;
+        bgOffsetFar += scrollSpeed * 0.1;
+        bgOffsetMid += scrollSpeed * 0.4;
+        bgOffsetGround += scrollSpeed;
+
+        nextObstacleTimer -= 1;
+        if (nextObstacleTimer <= 0) {
+          spawnObstacle();
+          const maxCooldown = Math.max(50, 150 - elapsedRealTime * 2);
+          const minCooldown = Math.max(35, 80 - elapsedRealTime * 1.5);
+          nextObstacleTimer = Math.random() * (maxCooldown - minCooldown) + minCooldown;
+        }
+
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obs = obstacles[i];
+          obs.x -= obs.speed;
+
+          if (checkCollision(bear, obs)) {
+            triggerGameOver();
+          }
+
+          if (obs.x < -100) {
+            obstacles.splice(i, 1);
+          }
+        }
+      }
+
+      bear.update();
+    }
+
+    function draw() {
+      ctx.save();
+      applyScreenShake();
+      drawBackground();
+      obstacles.forEach(drawObstacle);
+      updateAndDrawParticles();
+      updateLeaves();
+      bear.draw();
+      ctx.restore();
+    }
+
+    function tick() {
+      update();
+      draw();
+      requestAnimationFrame(tick);
+    }
+
+    function startGame() {
+      gameState = 'PLAYING';
+      startTime = performance.now();
+      elapsedRealTime = 0;
+      obstacles = [];
+      particles = [];
+      leaves = [];
+      nextObstacleTimer = 60;
+      bear.y = groundY - bear.height;
+      bear.vy = 0;
+      bear.isGrounded = true;
+
+      document.getElementById('screen-start').classList.remove('active');
+      document.getElementById('screen-gameover').classList.remove('active');
+    }
+
+    function triggerGameOver() {
+      gameState = 'GAMEOVER';
+      shakeIntensity = 20; 
+      const bounds = bear.getRenderBounds();
+      createFireExplosion(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+
+      if (elapsedRealTime > bestTime) {
+        bestTime = elapsedRealTime;
+        localStorage.setItem('gukkomi_best_time', bestTime);
+        document.getElementById('best-time').innerText = bestTime.toFixed(2);
+      }
+
+      document.getElementById('final-time').innerText = elapsedRealTime.toFixed(2) + 's';
+      document.getElementById('final-best').innerText = bestTime.toFixed(2) + 's';
+      
+      const randomMsg = encouragements[Math.floor(Math.random() * encouragements.length)];
+      document.getElementById('gameover-encouragement').innerText = randomMsg;
+
+      setTimeout(() => {
+        document.getElementById('screen-gameover').classList.add('active');
+      }, 700);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (gameState === 'PLAYING') {
+          bear.jump();
+        } else if (gameState === 'START') {
+          startGame();
+        }
+      }
+    });
+
+    // 모바일 전용 터치 동작 매핑 (더욱 정교하고 즉각적인 반응)
+    document.getElementById('btn-jump-action').addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (gameState === 'PLAYING') bear.jump();
+    });
+    document.getElementById('btn-jump-action').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      if (gameState === 'PLAYING') bear.jump();
+    });
+
+    document.getElementById('btn-start').addEventListener('click', startGame);
+    document.getElementById('btn-restart').addEventListener('click', startGame);
+
+    // 전체 캔버스 터치 영역도 작동하여 가로 화면 어느 곳을 누르든 가뿐하게 점프 가능
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (gameState === 'PLAYING') bear.jump();
+    });
+    canvas.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      if (gameState === 'PLAYING') bear.jump();
+    });
+
+    tick();
+  </script>
+</body>
+</html>
