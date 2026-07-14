@@ -14,30 +14,12 @@
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-between p-4 md:p-6 py-10">
 
-  <!-- 🧩 HEADER -->
-  <header class="w-full max-w-[480px] flex items-center border-b border-slate-800 pb-4 mb-6 justify-between">
-    <div class="flex items-center gap-2">
-      <span class="text-2xl">♟️</span>
-      <div>
-        <h1 class="text-lg font-black tracking-tight text-white">NOTATION INFINITY</h1>
-        <p class="text-[10px] text-slate-400">토너먼트 규격 무한 기보 지옥 (HTML 에디션)</p>
-      </div>
-    </div>
-    
-    <button id="soundToggle" class="p-2 bg-slate-900 border border-slate-800 rounded-lg cursor-pointer hover:bg-slate-800">
-      <!-- Volume 2 SVG -->
-      <svg id="soundOnIcon" class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 18.75V5.25L7.75 9.5H4.5v5h3.25L12 18.75z"></path></svg>
-      <!-- Volume X SVG -->
-      <svg id="soundOffIcon" class="w-4 h-4 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clip-rule="evenodd"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>
-    </button>
-  </header>
-
   <!-- 🚀 INTRO SCREEN -->
   <main id="introScreen" class="w-full max-w-[360px] bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center my-auto shadow-2xl">
     <h2 class="text-xl font-extrabold text-white mb-3">무한 체스 좌표 기동 훈련</h2>
     <p class="text-xs text-slate-400 leading-relaxed mb-6">
-      시간은 자비 없이 흐르고, 문제는 무한대로 생성된다.<br />
-      실제 대국 상황에서 <span class="text-emerald-400 font-bold">지정된 기보의 올바른 피스와 목적지</span>를 클릭해 스트릭을 올려봐! 한 번만 삐끗해도 네 기록은 0으로 폭발하니까 긴장하라구.
+      시간은 자비 없이 흐르고, 문제는 백의 차례로만 무한대로 생성된다.<br />
+      실제 대국 상황에서 <span class="text-emerald-400 font-bold">지정된 기보의 올바른 백 피스와 목적지</span>를 클릭해 스트릭을 올려봐! 한 번만 삐끗해도 네 기록은 0으로 폭발하니까 긴장하라구.
     </p>
 
     <button id="startBtn" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold rounded-xl cursor-pointer text-sm shadow-lg transition-transform active:scale-95">
@@ -45,10 +27,10 @@
     </button>
   </main>
 
-  <!-- 🎮 PLAYING SCREEN (flex 클래스를 기본 추가하고 gap을 6으로 대폭 확대) -->
+  <!-- 🎮 PLAYING SCREEN -->
   <main id="playingScreen" class="w-full max-w-[480px] flex flex-col gap-6 my-auto py-2 hidden">
     
-    <!-- 🔥 콤팩트 스태츠 대시보드 (격자 간격 확대) -->
+    <!-- 🔥 콤팩트 스태츠 대시보드 -->
     <div class="w-full grid grid-cols-4 gap-3">
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-center shadow">
         <div class="text-[9px] text-slate-400 flex items-center justify-center gap-1">🔥 스트릭</div>
@@ -71,7 +53,7 @@
       </div>
     </div>
 
-    <!-- 🎯 기보 메인 알림판 (패딩 확대 및 상하 여백 여유 확보) -->
+    <!-- 🎯 기보 메인 알림판 -->
     <div class="w-full bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center relative shadow-lg">
       <div id="notationBlurContainer" class="transition-all duration-350">
         <div id="turnBadge" class="text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5">다음 기보를 읽어라 (백 차례)</div>
@@ -79,7 +61,7 @@
       </div>
     </div>
 
-    <!-- 🏁 체스판 레이아웃 (보드 컨테이너 패딩과 세로 마진 조정) -->
+    <!-- 🏁 체스판 레이아웃 -->
     <div class="bg-slate-950 p-3.5 my-1 rounded-2xl border border-slate-800 relative overflow-hidden flex flex-col items-center">
       
       <!-- 🛑 일시정지 오버레이 블러 스크린 -->
@@ -109,13 +91,13 @@
 
     </div>
 
-    <!-- 📢 실시간 해설 배너 (패딩 넓혀서 텍스트 가독성 최적화) -->
+    <!-- 📢 실시간 해설 배너 -->
     <div id="toastBanner" class="w-full p-4 bg-emerald-950/40 border-l-4 border-emerald-500 text-emerald-200 rounded-lg text-xs font-semibold shadow-inner transition-all duration-300">
       <div class="text-[9px] uppercase tracking-wider opacity-60 mb-1">실시간 아나운서 해설</div>
       <p id="toastMessage">움직일 올바른 피스를 조준하고 탭해봐!</p>
     </div>
 
-    <!-- 🛠️ 제어 버튼 셋 (간격 확보 및 터치 타겟 패딩 확대) -->
+    <!-- 🛠️ 제어 버튼 셋 -->
     <div class="w-full flex gap-3">
       <button id="pauseBtn" class="flex-1 py-3.5 bg-slate-900 border border-slate-800 text-indigo-400 hover:bg-slate-800 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -143,9 +125,27 @@
     // --- 상숫값 세팅 ---
     const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'];
+    
+    // 유니코드 텍스트 폴백 데이터
     const PIECE_SYMBOLS = {
       wK: '♚', wQ: '♛', wR: '♜', wB: '♝', wN: '♞', wP: '♟',
       bK: '♚', bQ: '♛', bR: '♜', bB: '♝', bN: '♞', bP: '♟'
+    };
+
+    // 정교하게 동일 렌더링을 보장하는 고품질 벡터 SVG 이미지 매핑 (Wikimedia Commons)
+    const PIECE_IMAGES = {
+      wK: 'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg',
+      wQ: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg',
+      wR: 'https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg',
+      wB: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg',
+      wN: 'https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg',
+      wP: 'https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg',
+      bK: 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg',
+      bQ: 'https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg',
+      bR: 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg',
+      bB: 'https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg',
+      bN: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg',
+      bP: 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg'
     };
 
     const SARCASTIC_ERRORS = [
@@ -164,12 +164,11 @@
     ];
 
     // --- 글로벌 상태 변수 ---
-    let gameState = 'intro'; // 'intro', 'playing'
+    let gameState = 'intro'; 
     let currentIdx = 0;
     let currentPuzzle = null;
     let board = Array(8).fill(null).map(() => Array(8).fill(""));
     let selectedCell = null;
-    let soundEnabled = true;
     let hintUsed = false;
     let isPaused = false;
 
@@ -185,48 +184,7 @@
     let wrongSquare = null;
     let correctSquare = null;
 
-    // --- Web Audio API 사운드 합성 엔진 ---
-    function playBeep(type) {
-      if (!soundEnabled) return;
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        const now = ctx.currentTime;
-
-        if (type === 'success') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(523.25, now);
-          osc.frequency.setValueAtTime(659.25, now + 0.08);
-          osc.frequency.setValueAtTime(783.99, now + 0.16);
-          gain.gain.setValueAtTime(0.08, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-          osc.start(now);
-          osc.stop(now + 0.3);
-        } else if (type === 'error') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(140, now);
-          osc.frequency.linearRampToValueAtTime(80, now + 0.2);
-          gain.gain.setValueAtTime(0.12, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-          osc.start(now);
-          osc.stop(now + 0.2);
-        } else if (type === 'click') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(600, now);
-          gain.gain.setValueAtTime(0.05, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-          osc.start(now);
-          osc.stop(now + 0.05);
-        }
-      } catch (e) {
-        console.warn(e);
-      }
-    }
-
-    // --- 기보 무한 랜덤 생성기 ---
+    // --- 기보 무한 랜덤 생성기 (항상 백의 차례로 하드코딩) ---
     function generateInfinitePuzzle(id) {
       const pieces = [
         { type: 'N', name: 'Knight' },
@@ -238,9 +196,10 @@
       ];
 
       const piece = pieces[Math.floor(Math.random() * pieces.length)];
-      const isWhite = Math.random() > 0.5;
-      const colorChar = isWhite ? 'w' : 'b';
-      const oppColorChar = isWhite ? 'b' : 'w';
+      // 항상 백의 훈련만 되도록 보장
+      const isWhite = true;
+      const colorChar = 'w';
+      const oppColorChar = 'b';
 
       let fromR = Math.floor(Math.random() * 8);
       let fromC = Math.floor(Math.random() * 8);
@@ -295,8 +254,8 @@
           if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) validTargets.push({ r: nr, c: nc });
         });
       } else { // Pawn
-        const dir = isWhite ? -1 : 1;
-        const startRank = isWhite ? 6 : 1;
+        const dir = -1; // 백은 위쪽 인덱스로 전진
+        const startRank = 6; // 2열 (0-based 인덱스 6)
         const nr1 = fromR + dir;
         if (nr1 >= 0 && nr1 < 8) {
           validTargets.push({ r: nr1, c: fromC });
@@ -308,9 +267,9 @@
       }
 
       if (validTargets.length === 0) {
-        fromR = isWhite ? 6 : 1;
+        fromR = 6;
         fromC = 4;
-        validTargets.push({ r: isWhite ? 4 : 3, c: 4 });
+        validTargets.push({ r: 4, c: 4 });
       }
 
       const target = validTargets[Math.floor(Math.random() * validTargets.length)];
@@ -391,12 +350,12 @@
 
       return {
         id,
-        title: `${isWhite ? '백' : '흑'}의 ${piece.name}`,
+        title: `백의 ${piece.name}`,
         notation,
-        turn: isWhite ? 'White' : 'Black',
+        turn: 'White',
         from: FILES[fromC] + RANKS[fromR],
         to: targetCoord,
-        desc: `${isWhite ? '백' : '흑'} ${piece.name}을 ${notation}로 이동시켜!`,
+        desc: `백 ${piece.name}을 ${notation}로 이동시켜!`,
         board: newBoard
       };
     }
@@ -424,7 +383,7 @@
       }
     }
 
-    // --- 토스트 알림창 출력 함수 ---
+    // --- 토스트 알림창 출력 ---
     function updateToast(message, isError = false) {
       const banner = document.getElementById('toastBanner');
       const text = document.getElementById('toastMessage');
@@ -451,7 +410,6 @@
     // --- 일시정지 제어 ---
     function togglePause() {
       if (gameState !== 'playing') return;
-      playBeep('click');
       const pauseOverlay = document.getElementById('pauseOverlay');
       const notationContainer = document.getElementById('notationBlurContainer');
       const btnText = document.getElementById('pauseBtnText');
@@ -477,7 +435,6 @@
 
     // --- 대국 시작 ---
     function startGame() {
-      playBeep('click');
       setScreen('playing');
       
       currentIdx = 0;
@@ -491,7 +448,6 @@
       correctSquare = null;
       accumulatedTime = 0;
 
-      // 일시정지 리셋
       document.getElementById('pauseOverlay').classList.add('hidden');
       document.getElementById('notationBlurContainer').classList.remove('blur-sm');
       document.getElementById('pauseBtnText').innerText = "일시정지";
@@ -508,16 +464,14 @@
       correctSquare = null;
       accumulatedTime = 0;
 
-      // 텍스트 랜더링
-      document.getElementById('turnBadge').innerText = `다음 기보를 읽어라 (${currentPuzzle.turn === 'White' ? '백' : '흑'} 차례)`;
+      document.getElementById('turnBadge').innerText = `다음 기보를 읽어라 (백 차례)`;
       document.getElementById('targetNotation').innerText = currentPuzzle.notation;
       
-      // 스태츠 렌더링
       document.getElementById('statStreak').innerText = currentStreak;
       document.getElementById('statBest').innerText = bestStreak;
       document.getElementById('statAverage').innerText = getAverageTime() + 's';
 
-      updateToast(`${currentIdx === 0 ? "첫 번째" : "다음"} 지옥 퀴즈 스타트! 움직일 피스를 터치해!`, false);
+      updateToast(`${currentIdx === 0 ? "첫 번째" : "다음"} 지옥 퀴즈 스타트! 움직일 백 피스를 터치해!`, false);
       
       startTimer();
       renderBoard();
@@ -537,15 +491,12 @@
       const targetCoords = getCoordsFromNotation(currentPuzzle.to);
 
       if (!selectedCell) {
-        // 1단계: 피스 선택
         if (r === sourceCoords.r && c === sourceCoords.c) {
-          playBeep('click');
           selectedCell = { r, c };
           wrongSquare = null;
           updateToast("완벽해! 이제 기보가 지시하는 타겟 좌표 셀을 탭해!", false);
           renderBoard();
         } else {
-          playBeep('error');
           wrongSquare = { r, c };
           renderBoard();
           setTimeout(() => { wrongSquare = null; renderBoard(); }, 600);
@@ -553,7 +504,6 @@
           updateToast(randMsg, true);
         }
       } else {
-        // 2단계: 목적지 선택
         if (r === selectedCell.r && c === selectedCell.c) {
           selectedCell = null;
           updateToast("선택을 취소했어. 처음부터 다시 기보를 조준해봐.", false);
@@ -562,12 +512,9 @@
         }
 
         if (r === targetCoords.r && c === targetCoords.c) {
-          // 성공!
           stopTimer();
-          playBeep('success');
           correctSquare = { r, c };
 
-          // 보드 가상 이동 연출
           board[r][c] = board[selectedCell.r][selectedCell.c];
           board[selectedCell.r][selectedCell.c] = "";
           renderBoard();
@@ -587,8 +534,6 @@
           }, 1000);
 
         } else {
-          // 실패 - 스트릭 0폭발
-          playBeep('error');
           wrongSquare = { r, c };
           renderBoard();
           setTimeout(() => { wrongSquare = null; renderBoard(); }, 600);
@@ -604,12 +549,11 @@
     function showHint() {
       if (gameState !== 'playing' || !currentPuzzle || isPaused) return;
       hintUsed = true;
-      playBeep('click');
       updateToast(`[무료 과외] 출발지는 '${currentPuzzle.from}', 목표는 '${currentPuzzle.to}'라구!`, false);
       renderBoard();
     }
 
-    // --- 체스판 가상 DOM 렌더러 ---
+    // --- 체스판 가상 DOM 렌더러 (벡터 이미지 렌더링 및 에러 폰트백 폴백 탑재) ---
     function renderBoard() {
       const boardDiv = document.getElementById('chessBoard');
       boardDiv.innerHTML = '';
@@ -647,16 +591,22 @@
           cell.addEventListener('click', () => handleCellClick(r, c));
 
           if (piece) {
-            const pieceSpan = document.createElement('span');
-            pieceSpan.className = "text-2xl md:text-3xl font-extrabold select-none pointer-events-none";
-            pieceSpan.innerText = PIECE_SYMBOLS[piece];
+            const img = document.createElement('img');
+            img.src = PIECE_IMAGES[piece];
+            img.className = "w-[85%] h-[85%] object-contain select-none pointer-events-none";
             
-            // 피스 유니코드 음영 스타일 부여
-            const isWhitePiece = piece[0] === 'w';
-            pieceSpan.style = isWhitePiece 
-              ? "color: #ffffff; text-shadow: 1.5px 1.5px 0 #000, -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000;"
-              : "color: #0f172a; text-shadow: 1.5px 1.5px 0 #fff, -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff;";
-            cell.appendChild(pieceSpan);
+            // 네트워크 순단 또는 이미지 오류 시, OS 고유의 유니코드 텍스트로 자연스럽게 폴백 처리함
+            img.onerror = () => {
+              img.remove();
+              const span = document.createElement('span');
+              span.innerText = PIECE_SYMBOLS[piece];
+              span.className = "text-2xl md:text-3xl font-extrabold select-none pointer-events-none";
+              span.style = piece[0] === 'w' 
+                ? "color: #ffffff; text-shadow: 1.5px 1.5px 0 #000, -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000;"
+                : "color: #0f172a; text-shadow: 1.5px 1.5px 0 #fff, -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff;";
+              cell.appendChild(span);
+            };
+            cell.appendChild(img);
           }
 
           // 구석 미니 좌표 라벨
@@ -697,7 +647,6 @@
 
       document.getElementById('startBtn').addEventListener('click', startGame);
       document.getElementById('exitBtn').addEventListener('click', () => {
-        playBeep('click');
         stopTimer();
         setScreen('intro');
       });
@@ -705,21 +654,6 @@
       document.getElementById('pauseBtn').addEventListener('click', togglePause);
       document.getElementById('overlayResumeBtn').addEventListener('click', togglePause);
       document.getElementById('hintBtn').addEventListener('click', showHint);
-
-      // 사운드 스위치 클릭 이벤트
-      document.getElementById('soundToggle').addEventListener('click', () => {
-        soundEnabled = !soundEnabled;
-        const soundOn = document.getElementById('soundOnIcon');
-        const soundOff = document.getElementById('soundOffIcon');
-        if (soundEnabled) {
-          soundOn.classList.remove('hidden');
-          soundOff.classList.add('hidden');
-          playBeep('click');
-        } else {
-          soundOn.classList.add('hidden');
-          soundOff.classList.remove('hidden');
-        }
-      });
     });
   </script>
 </body>
