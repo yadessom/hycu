@@ -18,12 +18,12 @@
   <main id="introScreen" class="w-full max-w-[360px] bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center my-auto shadow-2xl">
     <h2 class="text-xl font-extrabold text-white mb-3">무한 체스 좌표 기동 훈련</h2>
     <p class="text-xs text-slate-400 leading-relaxed mb-6">
-      시간은 자비 없이 흐르고, 문제는 백의 차례로만 무한대로 생성된다.<br />
-      실제 대국 상황에서 <span class="text-emerald-400 font-bold">지정된 기보의 올바른 백 피스와 목적지</span>를 클릭해 스트릭을 올려봐! 한 번만 삐끗해도 네 기록은 0으로 폭발하니까 긴장하라구.
+      시간은 자비 없이 흐르고, 문제는 백의 차례로만 무한 생성된다.<br />
+      이제 <span class="text-emerald-400 font-bold">오프닝, 미들게임, 엔드게임</span>의 다양한 국면 속에서 지정된 기보의 정확한 백 피스와 목적지를 사격하듯 탭해보라구!
     </p>
 
     <button id="startBtn" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold rounded-xl cursor-pointer text-sm shadow-lg transition-transform active:scale-95">
-      기보 지옥 열차 탑승하기
+      훈련 개시하기
     </button>
   </main>
 
@@ -56,8 +56,9 @@
     <!-- 🎯 기보 메인 알림판 -->
     <div class="w-full bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center relative shadow-lg">
       <div id="notationBlurContainer" class="transition-all duration-350">
-        <div id="turnBadge" class="text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5">다음 기보를 읽어라 (백 차례)</div>
+        <div id="turnBadge" class="text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5 transition-all">다음 기보를 읽어라 (백 차례)</div>
         <div id="targetNotation" class="text-4xl font-black text-white font-mono tracking-tight">e4</div>
+        <div id="stageBadge" class="text-[9px] text-slate-400 mt-1 font-semibold uppercase tracking-wider">상황 파악 중...</div>
       </div>
     </div>
 
@@ -89,12 +90,6 @@
       <!-- 하단 가로 알파벳 인덱스 (a to h) -->
       <div id="filesContainer" class="flex ml-5 mt-1.5 text-center text-slate-400 font-bold text-[10px] select-none"></div>
 
-    </div>
-
-    <!-- 📢 실시간 해설 배너 -->
-    <div id="toastBanner" class="w-full p-4 bg-emerald-950/40 border-l-4 border-emerald-500 text-emerald-200 rounded-lg text-xs font-semibold shadow-inner transition-all duration-300">
-      <div class="text-[9px] uppercase tracking-wider opacity-60 mb-1">실시간 아나운서 해설</div>
-      <p id="toastMessage">움직일 올바른 피스를 조준하고 탭해봐!</p>
     </div>
 
     <!-- 🛠️ 제어 버튼 셋 -->
@@ -163,6 +158,80 @@
       "대충 찍은 거 다 알아. 계속해봐."
     ];
 
+    // --- ♟️ 오프닝 고정 레시피 프리셋 풀 (정상적인 대국 시작 배치 보장) ---
+    function getStandardBoard() {
+      return [
+        ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+        ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
+        ["", "", "", "", "", "", "", ""],
+        ["", "", "", "", "", "", "", ""],
+        ["", "", "", "", "", "", "", ""],
+        ["", "", "", "", "", "", "", ""],
+        ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
+        ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
+      ];
+    }
+
+    function applyMove(bd, fromStr, toStr) {
+      const from = { r: RANKS.indexOf(fromStr[1]), c: FILES.indexOf(fromStr[0]) };
+      const to = { r: RANKS.indexOf(toStr[1]), c: FILES.indexOf(toStr[0]) };
+      bd[to.r][to.c] = bd[from.r][from.c];
+      bd[from.r][from.c] = "";
+    }
+
+    const OPENING_PRESETS = [
+      {
+        title: "루이 로페즈 (Ruy Lopez)",
+        setup: (bd) => {
+          applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
+          applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
+        },
+        from: "f1", to: "b5", notation: "Bb5",
+        desc: "백의 f1 비숍을 b5로 기동하여 흑의 c6 나이트를 압박하고 중앙 우위를 다집니다."
+      },
+      {
+        title: "이탈리안 게임 (Italian Game)",
+        setup: (bd) => {
+          applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
+          applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
+        },
+        from: "f1", to: "c4", notation: "Bc4",
+        desc: "비숍을 c4에 배치하여 흑의 가장 부서지기 쉬운 아킬레스건인 f7 폰을 즉각 저격합니다."
+      },
+      {
+        title: "퀸즈 갬빗 (Queen's Gambit)",
+        setup: (bd) => {
+          applyMove(bd, "d2", "d4"); applyMove(bd, "d7", "d5");
+        },
+        from: "c2", to: "c4", notation: "c4",
+        desc: "c폰을 미끼로 던지는 척하며 중앙 통제권을 틀어쥐는 유서 깊은 빌드입니다."
+      },
+      {
+        title: "시실리안 디펜스 (Sicilian: Open)",
+        setup: (bd) => {
+          applyMove(bd, "e2", "e4"); applyMove(bd, "c7", "c5");
+          applyMove(bd, "g1", "f3"); applyMove(bd, "d7", "d6");
+        },
+        from: "d2", to: "d4", notation: "d4",
+        desc: "백이 중앙 d4를 박차고 전진하여 강력한 센터 장악 및 공격 템포를 조율합니다."
+      },
+      {
+        title: "스카치 게임 (Scotch Game)",
+        setup: (bd) => {
+          applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
+          applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
+        },
+        from: "d2", to: "d4", notation: "d4",
+        desc: "초반부터 중앙 d4 공간을 적극적으로 오픈하며 속공 전술의 서막을 엽니다."
+      },
+      {
+        title: "잉글리시 오프닝 (English Opening)",
+        setup: (bd) => {}, // 초기 기본 상태에서 첫 수
+        from: "c2", to: "c4", notation: "c4",
+        desc: "측면 c폰을 한 칸 더 전진시켜 중앙의 d5 공간을 가로지르는 우아한 측면 압박 오프닝입니다."
+      }
+    ];
+
     // --- 글로벌 상태 변수 ---
     let gameState = 'intro'; 
     let currentIdx = 0;
@@ -184,8 +253,33 @@
     let wrongSquare = null;
     let correctSquare = null;
 
-    // --- 기보 무한 랜덤 생성기 (체스 합법 행마 및 기물 개수 극도의 통제) ---
+    // --- STREAMING_CHUNK:Implementing puzzle generator logic ---
+    // --- 기보 무한 랜덤 생성기 (오프닝, 미들게임, 엔드게임 삼중 체제 탑재) ---
     function generateInfinitePuzzle(id) {
+      // 3가지 국면 중 하나를 무작위로 낙점
+      const phases = ['opening', 'middlegame', 'endgame'];
+      const phase = phases[Math.floor(Math.random() * phases.length)];
+
+      if (phase === 'opening') {
+        // 1. 오프닝 빌더
+        const preset = OPENING_PRESETS[Math.floor(Math.random() * OPENING_PRESETS.length)];
+        const openingBoard = getStandardBoard();
+        preset.setup(openingBoard);
+
+        return {
+          id,
+          phase: "오프닝 (Opening) 상황",
+          title: preset.title,
+          notation: preset.notation,
+          turn: 'White',
+          from: preset.from,
+          to: preset.to,
+          desc: preset.desc,
+          board: openingBoard
+        };
+      }
+
+      // 미들게임과 엔드게임은 기물의 갯수 밀도로 차별화하여 조립
       const pieces = [
         { type: 'N', name: 'Knight' },
         { type: 'B', name: 'Bishop' },
@@ -196,7 +290,6 @@
       ];
 
       const piece = pieces[Math.floor(Math.random() * pieces.length)];
-      const isWhite = true; // 무조건 백의 차례
       const colorChar = 'w';
       const oppColorChar = 'b';
 
@@ -204,13 +297,12 @@
       let valid = false;
       let attempts = 0;
 
-      // 1. 합법 행마 좌표계 산출 (attempts 방어코드 탑재)
-      while (!valid && attempts < 200) {
+      // 합법적인 화이트 기동선 연출 계산
+      while (!valid && attempts < 250) {
         attempts++;
         fromR = Math.floor(Math.random() * 8);
         fromC = Math.floor(Math.random() * 8);
 
-        // 폰은 1열과 8열에 시작 자체가 불가능
         if (piece.type === 'P' && (fromR === 0 || fromR === 7)) continue;
 
         const isCapture = Math.random() > 0.4;
@@ -218,20 +310,16 @@
 
         if (piece.type === 'P') {
           if (isCapture) {
-            // 폰은 잡을 때 오직 대각선으로만 갈 수 있음 (White는 위쪽행으로 전진하므로 r - 1)
             const nextR = fromR - 1;
             if (nextR >= 0) {
               if (fromC - 1 >= 0) moves.push({ r: nextR, c: fromC - 1 });
               if (fromC + 1 < 8) moves.push({ r: nextR, c: fromC + 1 });
             }
           } else {
-            // 잡지 않을 때는 오직 전진만 가능
             const nextR1 = fromR - 1;
             if (nextR1 >= 0) {
               moves.push({ r: nextR1, c: fromC });
-              if (fromR === 6) { // 백폰 스타트지점에서의 더블 스텝
-                moves.push({ r: fromR - 2, c: fromC });
-              }
+              if (fromR === 6) moves.push({ r: fromR - 2, c: fromC });
             }
           }
         } else if (piece.type === 'N') {
@@ -284,19 +372,18 @@
       }
 
       if (!valid) {
-        // 비상탈출용 정적 폴백
         fromR = 6; fromC = 4; toR = 4; toC = 4;
       }
 
       const isActuallyCapture = (fromC !== toC && piece.type === 'P') || (piece.type !== 'P' && Math.random() > 0.4);
 
-      // 2. 가상 보드판 빌드 및 금지 타일(이동 경로/출발/목적지) 격리
+      // 격리 가상 보드판 조립 시작
       const newBoard = Array(8).fill(null).map(() => Array(8).fill(""));
       const forbidden = new Set();
       forbidden.add(`${fromR}-${fromC}`);
       forbidden.add(`${toR}-${toC}`);
 
-      // 슬라이딩 기물의 경로를 forbidden에 집어넣어 decorative 기물들이 절대 이 위를 가로막지 않도록 보장 (합법 행마 유지)
+      // 슬라이더 기물의 합법 궤적상에 어떠한 기물도 오지 않게 금지 영역 추가
       if (['B', 'R', 'Q'].includes(piece.type)) {
         const dr = Math.sign(toR - fromR);
         const dc = Math.sign(toC - fromC);
@@ -309,7 +396,7 @@
         }
       }
 
-      // 3. 백과 흑의 킹(King)은 각각 반드시 '딱 1개씩만' 안전한 외딴 영역에 배치
+      // 백/흑 필수 킹 배치 (킹과 킹이 서로 맞붙을 수 없게 거리 필터링)
       let wK_R = 7, wK_C = 4, bK_R = 0, bK_C = 4;
 
       if (piece.type === 'K') {
@@ -328,7 +415,6 @@
         }
       }
 
-      // 흑의 킹을 배치하되 백의 킹 또는 백 킹이 이동할 타겟 영역에 인접하여 불법 상황을 야기하지 않도록 거리 필터 적용
       let bK_placed = false;
       let bK_attempts = 0;
       while (!bK_placed && bK_attempts < 150) {
@@ -348,7 +434,6 @@
       }
       
       if (!bK_placed) {
-        // 비상용 bK 강제 타격 배치
         for (let r = 0; r < 8; r++) {
           for (let c = 0; c < 8; c++) {
             if (!forbidden.has(`${r}-${c}`)) {
@@ -363,34 +448,34 @@
         }
       }
 
-      // 4. 활성 백 기물 및 타겟 배치
+      // 핵심 문제 피스 안착
       newBoard[fromR][fromC] = colorChar + piece.type;
       
       if (isActuallyCapture) {
         const bPieces = ['P', 'N', 'B', 'R', 'Q'];
         let bType = bPieces[Math.floor(Math.random() * bPieces.length)];
-        // 폰은 끝열에 배치 불가능
         if (bType === 'P' && (toR === 0 || toR === 7)) bType = 'N';
         newBoard[toR][toC] = 'b' + bType;
       } else {
         newBoard[toR][toC] = "";
       }
 
-      // 5. 흑과 백의 기타 기물 개수 극도로 조여서 배치 (각 사이드 당 최대 2개 이하만)
+      // 기물 밀도(Density) 조절부
+      // 미들게임: 흑백 각각 6~8개 기물 활성화 / 엔드게임: 흑백 각각 2개 이하 극소량 조절
+      let extraWhiteMax = (phase === 'middlegame') ? 7 : 1;
+      let extraBlackMax = (phase === 'middlegame') ? 7 : 1;
+
       let currentWhiteNonKing = (piece.type !== 'K') ? 1 : 0;
       let currentBlackNonKing = isActuallyCapture ? 1 : 0;
 
-      const maxExtraWhite = 2 - currentWhiteNonKing; 
-      const maxExtraBlack = 2 - currentBlackNonKing; 
-
-      const numExtraWhite = Math.floor(Math.random() * (maxExtraWhite + 1));
-      const numExtraBlack = Math.floor(Math.random() * (maxExtraBlack + 1));
+      const numExtraWhite = Math.max(0, Math.floor(Math.random() * (extraWhiteMax + 1 - currentWhiteNonKing)));
+      const numExtraBlack = Math.max(0, Math.floor(Math.random() * (extraBlackMax + 1 - currentBlackNonKing)));
 
       const wPool = ['wP', 'wN', 'wB', 'wR', 'wQ'];
       const bPool = ['bP', 'bN', 'bB', 'bR', 'bQ'];
 
       let extraWhitePlaced = 0, placeAttempts = 0;
-      while (extraWhitePlaced < numExtraWhite && placeAttempts < 50) {
+      while (extraWhitePlaced < numExtraWhite && placeAttempts < 100) {
         placeAttempts++;
         const r = Math.floor(Math.random() * 8);
         const c = Math.floor(Math.random() * 8);
@@ -404,7 +489,7 @@
       }
 
       let extraBlackPlaced = 0; placeAttempts = 0;
-      while (extraBlackPlaced < numExtraBlack && placeAttempts < 50) {
+      while (extraBlackPlaced < numExtraBlack && placeAttempts < 100) {
         placeAttempts++;
         const r = Math.floor(Math.random() * 8);
         const c = Math.floor(Math.random() * 8);
@@ -418,12 +503,11 @@
         }
       }
 
-      // 6. 정확한 공식 체스 기보 생성 규칙 수립
-      const targetCoord = FILES[target.c] + RANKS[target.r];
+      // 기보 생성 로직
+      const targetCoord = FILES[toC] + RANKS[toR];
       let notation = "";
       if (piece.type === 'P') {
         if (isActuallyCapture) {
-          // 폰 캡처 시: axb5, cxd4 등 출발 파일 명시 필수 규칙 준수
           notation = FILES[fromC] + 'x' + targetCoord;
         } else {
           notation = targetCoord;
@@ -438,6 +522,7 @@
 
       return {
         id,
+        phase: phase === 'middlegame' ? "미들게임 (Middlegame) 상황" : "엔드게임 (Endgame) 상황",
         title: `백의 ${piece.name}`,
         notation,
         turn: 'White',
@@ -471,16 +556,23 @@
       }
     }
 
-    // --- 토스트 알림창 출력 ---
-    function updateToast(message, isError = false) {
-      const banner = document.getElementById('toastBanner');
-      const text = document.getElementById('toastMessage');
-      text.innerText = message;
-      if (isError) {
-        banner.className = "w-full p-4 bg-red-950/40 border-l-4 border-red-500 text-red-200 rounded-lg text-xs font-semibold shadow-inner transition-all duration-300";
+    // --- 메인 피드백 알림 연출 (실시간 아나운서 배너 삭제에 따른 알림판 활용) ---
+    function flashFeedback(message, status) {
+      const turnBadge = document.getElementById('turnBadge');
+      turnBadge.innerText = message;
+      if (status === 'success') {
+        turnBadge.className = "text-[11px] text-emerald-400 font-extrabold tracking-widest mb-1.5 animate-pulse";
+      } else if (status === 'error') {
+        turnBadge.className = "text-[11px] text-rose-500 font-extrabold tracking-widest mb-1.5 animate-bounce";
       } else {
-        banner.className = "w-full p-4 bg-emerald-950/30 border-l-4 border-emerald-500 text-emerald-200 rounded-lg text-xs font-semibold shadow-inner transition-all duration-300";
+        turnBadge.className = "text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5";
       }
+    }
+
+    function resetFeedback() {
+      const turnBadge = document.getElementById('turnBadge');
+      turnBadge.innerText = "다음 기보를 읽어라 (백 차례)";
+      turnBadge.className = "text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5";
     }
 
     // --- 게임 상태 화면 제어 ---
@@ -509,7 +601,7 @@
         btnText.innerText = "일시정지";
         lastStartTime = performance.now();
         startTimer();
-        updateToast("집중해! 타이머 다시 돌아간다!", false);
+        flashFeedback("다시 타이머 작동 중!", 'normal');
       } else {
         stopTimer();
         accumulatedTime += (performance.now() - lastStartTime);
@@ -517,7 +609,7 @@
         pauseOverlay.classList.remove('hidden');
         notationContainer.classList.add('blur-sm');
         btnText.innerText = "이어하기";
-        updateToast("일시정지 중... 머릿속으로 꼼수 그리지 마!", false);
+        flashFeedback("일시정지 상태", 'normal');
       }
     }
 
@@ -552,14 +644,13 @@
       correctSquare = null;
       accumulatedTime = 0;
 
-      document.getElementById('turnBadge').innerText = `다음 기보를 읽어라 (백 차례)`;
+      resetFeedback();
       document.getElementById('targetNotation').innerText = currentPuzzle.notation;
+      document.getElementById('stageBadge').innerText = `${currentPuzzle.phase} : ${currentPuzzle.title}`;
       
       document.getElementById('statStreak').innerText = currentStreak;
       document.getElementById('statBest').innerText = bestStreak;
       document.getElementById('statAverage').innerText = getAverageTime() + 's';
-
-      updateToast(`${currentIdx === 0 ? "첫 번째" : "다음"} 지옥 퀴즈 스타트! 움직일 백 피스를 터치해!`, false);
       
       startTimer();
       renderBoard();
@@ -582,19 +673,19 @@
         if (r === sourceCoords.r && c === sourceCoords.c) {
           selectedCell = { r, c };
           wrongSquare = null;
-          updateToast("완벽해! 이제 기보가 지시하는 타겟 좌표 셀을 탭해!", false);
+          flashFeedback("🎯 정확해! 이제 목적지 좌표를 터치해!", 'success');
           renderBoard();
         } else {
           wrongSquare = { r, c };
           renderBoard();
           setTimeout(() => { wrongSquare = null; renderBoard(); }, 600);
           const randMsg = SARCASTIC_ERRORS[Math.floor(Math.random() * SARCASTIC_ERRORS.length)];
-          updateToast(randMsg, true);
+          flashFeedback(`❌ ${randMsg}`, 'error');
         }
       } else {
         if (r === selectedCell.r && c === selectedCell.c) {
           selectedCell = null;
-          updateToast("선택을 취소했어. 처음부터 다시 기보를 조준해봐.", false);
+          flashFeedback("기물 선택 취소됨.", 'normal');
           renderBoard();
           return;
         }
@@ -614,7 +705,7 @@
           problemTimes.push(finalTime);
 
           const randSucess = SARCASTIC_SUCCESSES[Math.floor(Math.random() * SARCASTIC_SUCCESSES.length)];
-          updateToast(`통과! (+${finalTime}초) ${randSucess}`, false);
+          flashFeedback(`✅ 통과! (${finalTime}초) ${randSucess}`, 'success');
 
           setTimeout(() => {
             currentIdx++;
@@ -627,7 +718,7 @@
           setTimeout(() => { wrongSquare = null; renderBoard(); }, 600);
           selectedCell = null;
           currentStreak = 0;
-          updateToast("아이고! 목적지가 개판이라 아까운 정답 스트릭이 산산조각났어!", true);
+          flashFeedback("💥 목적지 오답! 스트릭 폭발!", 'error');
           renderBoard();
         }
       }
@@ -637,10 +728,11 @@
     function showHint() {
       if (gameState !== 'playing' || !currentPuzzle || isPaused) return;
       hintUsed = true;
-      updateToast(`[무료 과외] 출발지는 '${currentPuzzle.from}', 목표는 '${currentPuzzle.to}'라구!`, false);
+      flashFeedback(`💡 가이드: [${currentPuzzle.from}]에서 [${currentPuzzle.to}]로 이동!`, 'success');
       renderBoard();
     }
 
+    // --- STREAMING_CHUNK:Developing board renderer ---
     // --- 체스판 가상 DOM 렌더러 ---
     function renderBoard() {
       const boardDiv = document.getElementById('chessBoard');
@@ -676,7 +768,12 @@
           const cell = document.createElement('div');
           cell.className = "chess-cell";
           cell.style = `background: ${baseBg}; ${overlayStyle}`;
-          cell.addEventListener('click', () => handleCellClick(r, c));
+          
+          // 모바일 반응성을 향상시키기 위해 터치와 클릭 이벤트를 일괄적으로 바인딩
+          cell.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleCellClick(r, c);
+          });
 
           if (piece) {
             const img = document.createElement('img');
@@ -728,8 +825,9 @@
       });
     }
 
+    // --- STREAMING_CHUNK:Binding user controls and interface events ---
     // --- 초기 이벤트 바인딩 ---
-    window.addEventListener('DOMContentLoaded', () => {
+    window.onload = function() {
       renderCoords();
 
       document.getElementById('startBtn').addEventListener('click', startGame);
@@ -741,7 +839,7 @@
       document.getElementById('pauseBtn').addEventListener('click', togglePause);
       document.getElementById('overlayResumeBtn').addEventListener('click', togglePause);
       document.getElementById('hintBtn').addEventListener('click', showHint);
-    });
+    }
   </script>
 </body>
 </html>
