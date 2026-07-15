@@ -6,24 +6,20 @@
   <title>NOTATION INFINITY - CHESS NOTATION HELL</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: sans-serif; user-select: none; -webkit-user-select: none; }
-    .chess-cell { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: all 0.1s ease; }
-    @media (min-width: 640px) { .chess-cell { width: 48px; height: 48px; } }
-    .overlay-paused { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    body { font-family: sans-serif; user-select: none; -webkit-user-select: none; background-color: #222222; }
+    .chess-board { display: grid; grid-template-columns: repeat(8, 1fr); width: 100%; max-width: 400px; aspect-ratio: 1 / 1; overflow: hidden; background-color: #222222; border-radius: 8px; }
+    .chess-cell { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: all 0.1s ease; width: 100%; }
+    .overlay-paused { position: absolute; inset: 0; background: rgba(34, 34, 34, 0.98); backdrop-filter: blur(16px); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
   </style>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-between p-4 md:p-6 py-10">
+<body class="min-h-screen text-neutral-200 flex flex-col items-center justify-between p-4 md:p-6 py-10">
 
   <!-- 🚀 INTRO SCREEN -->
-  <main id="introScreen" class="w-full max-w-[360px] bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center my-auto shadow-2xl">
-    <h2 class="text-xl font-extrabold text-white mb-3">무한 체스 좌표 기동 훈련</h2>
-    <p class="text-xs text-slate-400 leading-relaxed mb-6">
-      시간은 자비 없이 흐르고, 문제는 백의 차례로만 무한 생성된다.<br />
-      이제 <span class="text-emerald-400 font-bold">오프닝, 미들게임, 엔드게임</span>의 다양한 국면 속에서 지정된 기보의 정확한 백 피스와 목적지를 사격하듯 탭해보라구!
-    </p>
+  <main id="introScreen" class="w-full max-w-[360px] bg-[#333333] border border-neutral-800 rounded-2xl p-6 text-center my-auto shadow-2xl">
+    <h2 class="text-xl font-extrabold text-white mb-6 tracking-tight">무한 체스 좌표 기동 훈련</h2>
 
-    <button id="startBtn" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold rounded-xl cursor-pointer text-sm shadow-lg transition-transform active:scale-95">
-      훈련 개시하기
+    <button id="startBtn" class="w-full py-3 bg-[#386b52] hover:bg-[#28503e] text-white font-black rounded-xl cursor-pointer text-sm transition-all transform active:scale-95 shadow">
+      진짜 실전 훈련 개시하기
     </button>
   </main>
 
@@ -32,79 +28,61 @@
     
     <!-- 🔥 콤팩트 스태츠 대시보드 -->
     <div class="w-full grid grid-cols-4 gap-3">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-slate-400 flex items-center justify-center gap-1">🔥 스트릭</div>
+      <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">🔥 스트릭</div>
         <div id="statStreak" class="text-lg font-black text-orange-500">0</div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-slate-400 flex items-center justify-center gap-1">👑 최고기록</div>
+      <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">👑 최고기록</div>
         <div id="statBest" class="text-lg font-black text-amber-500">0</div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-slate-400 flex items-center justify-center gap-1">⏱️ 소요시간</div>
-        <div id="statTime" class="text-lg font-black text-indigo-400 font-mono">0.0s</div>
+      <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⏱️ 소요시간</div>
+        <div id="statTime" class="text-lg font-black text-neutral-300 font-mono">0.0s</div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-slate-400 flex items-center justify-center gap-1">⚡ 평균기록</div>
+      <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⚡ 평균기록</div>
         <div id="statAverage" class="text-lg font-black text-emerald-400 font-mono">0.00s</div>
       </div>
     </div>
 
     <!-- 🎯 기보 메인 알림판 -->
-    <div class="w-full bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center relative shadow-lg">
+    <div class="w-full bg-[#333333] border border-neutral-800 rounded-2xl p-5 text-center relative shadow-lg">
       <div id="notationBlurContainer" class="transition-all duration-350">
         <div id="turnBadge" class="text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5 transition-all">다음 기보를 읽어라 (백 차례)</div>
         <div id="targetNotation" class="text-4xl font-black text-white font-mono tracking-tight">e4</div>
-        <div id="stageBadge" class="text-[9px] text-slate-400 mt-1 font-semibold uppercase tracking-wider">상황 파악 중...</div>
+        <div id="stageBadge" class="text-[9px] text-neutral-400 mt-1 font-semibold uppercase tracking-wider">상황 파악 중...</div>
       </div>
     </div>
 
     <!-- 🏁 체스판 레이아웃 -->
-    <div class="bg-slate-950 p-3.5 my-1 rounded-2xl border border-slate-800 relative overflow-hidden flex flex-col items-center">
+    <div class="relative overflow-hidden flex flex-col items-center justify-center w-full my-2">
       
       <!-- 🛑 일시정지 오버레이 블러 스크린 -->
       <div id="pauseOverlay" class="overlay-paused hidden">
         <div class="text-3xl mb-2">⏱️</div>
-        <div class="text-base font-black text-white mb-1">일시정지 중</div>
-        <p class="text-[11px] text-slate-400 max-w-[240px] leading-relaxed mb-4">
-          잠시 머리를 식히는 중인가?<br />
-          기보를 야비하게 훔쳐보는 꼼수를 막기 위해 판은 가려뒀어!
-        </p>
-        <button id="overlayResumeBtn" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-lg text-xs cursor-pointer shadow">
-          당당하게 이어하기
+        <div class="text-base font-black text-white mb-6">일시정지 중</div>
+        <button id="overlayResumeBtn" class="px-5 py-2.5 bg-[#386b52] hover:bg-[#28503e] text-white font-extrabold rounded-lg text-xs cursor-pointer shadow">
+          이어하기
         </button>
       </div>
 
-      <!-- 보드 그리드 및 좌표 -->
-      <div class="flex">
-        <!-- 왼쪽 세로 인덱스 (8 to 1) -->
-        <div id="ranksContainer" class="flex flex-col justify-around text-center w-5 text-slate-400 font-bold text-[10px] select-none pr-1"></div>
-        
-        <!-- 8x8 실제 보드판 -->
-        <div id="chessBoard" class="grid grid-cols-8 gap-0 border border-slate-800 rounded-lg overflow-hidden bg-slate-900 shadow-2xl"></div>
-      </div>
-
-      <!-- 하단 가로 알파벳 인덱스 (a to h) -->
-      <div id="filesContainer" class="flex ml-5 mt-1.5 text-center text-slate-400 font-bold text-[10px] select-none"></div>
+      <!-- 8x8 실제 보드판 -->
+      <div id="chessBoard" class="chess-board"></div>
 
     </div>
 
     <!-- 🛠️ 제어 버튼 셋 -->
     <div class="w-full flex gap-3">
-      <button id="pauseBtn" class="flex-1 py-3.5 bg-slate-900 border border-slate-800 text-indigo-400 hover:bg-slate-800 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
+      <button id="pauseBtn" class="flex-1 py-3.5 bg-[#333333] border border-neutral-800 text-neutral-300 hover:bg-neutral-800 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <span id="pauseBtnText">일시정지</span>
       </button>
 
-      <button id="hintBtn" class="flex-1 py-3.5 bg-slate-900 border border-slate-800 text-amber-500 hover:bg-slate-800 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        힌트 보기
-      </button>
-
-      <button id="exitBtn" class="px-5 py-3.5 bg-slate-900 text-slate-400 hover:bg-slate-800 text-xs font-semibold rounded-xl cursor-pointer transition-colors border border-slate-800">
+      <button id="exitBtn" class="flex-1 py-3.5 bg-[#333333] border border-neutral-800 text-neutral-400 hover:bg-neutral-800 text-xs font-semibold rounded-xl cursor-pointer transition-colors">
         그만두기
       </button>
     </div>
@@ -112,22 +90,19 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="w-full max-w-[480px] text-center text-[10px] text-slate-600 border-t border-slate-900 pt-3 mt-8">
+  <footer class="w-full max-w-[480px] text-center text-[10px] text-neutral-600 border-t border-neutral-900 pt-3 mt-8">
     © 2026 NOTATION INFINITY. 무한 트레이닝 지옥에서 빠져나와봐.
   </footer>
 
   <script>
-    // --- 상숫값 세팅 ---
     const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'];
     
-    // 유니코드 텍스트 폴백 데이터
     const PIECE_SYMBOLS = {
       wK: '♚', wQ: '♛', wR: '♜', wB: '♝', wN: '♞', wP: '♟',
       bK: '♚', bQ: '♛', bR: '♜', bB: '♝', bN: '♞', bP: '♟'
     };
 
-    // 전 세계 공통 고해상도 SVG 이미지 매핑
     const PIECE_IMAGES = {
       wK: 'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg',
       wQ: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg',
@@ -145,7 +120,7 @@
 
     const SARCASTIC_ERRORS = [
       "눈은 데코레이션이야? 그 피스 아니라고!",
-      "체스판에 낙서하지 말고 제대로 좌표 봐라ㅋㅋ",
+      "체스판에 낙서하지 말고 제대로 머릿속 좌표 봐라ㅋㅋ",
       "완벽한 블런더네. 기보 처음 배워?",
       "뇌 정지 왔어? 손가락 움직이기 전에 한 번만 더 생각해.",
       "거긴 절대 갈 수 없는 곳이야. 너의 레이팅처럼 말이지!"
@@ -158,7 +133,6 @@
       "대충 찍은 거 다 알아. 계속해봐."
     ];
 
-    // --- ♟️ 오프닝 고정 레시피 프리셋 풀 (정상적인 대국 시작 배치 보장) ---
     function getStandardBoard() {
       return [
         ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -196,7 +170,7 @@
           applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
         },
         from: "f1", to: "c4", notation: "Bc4",
-        desc: "비숍을 c4에 배치하여 흑의 가장 부서지기 쉬운 아킬레스건인 f7 폰을 즉각 저격합니다."
+        desc: "비숍을 c4에 배치하여 흑의 가장 부서지기 쉬운 f7 폰을 즉각 저격합니다."
       },
       {
         title: "퀸즈 갬빗 (Queen's Gambit)",
@@ -226,19 +200,17 @@
       },
       {
         title: "잉글리시 오프닝 (English Opening)",
-        setup: (bd) => {}, // 초기 기본 상태에서 첫 수
+        setup: (bd) => {}, 
         from: "c2", to: "c4", notation: "c4",
         desc: "측면 c폰을 한 칸 더 전진시켜 중앙의 d5 공간을 가로지르는 우아한 측면 압박 오프닝입니다."
       }
     ];
 
-    // --- 글로벌 상태 변수 ---
     let gameState = 'intro'; 
     let currentIdx = 0;
     let currentPuzzle = null;
     let board = Array(8).fill(null).map(() => Array(8).fill(""));
     let selectedCell = null;
-    let hintUsed = false;
     let isPaused = false;
 
     let currentStreak = 0;
@@ -253,15 +225,11 @@
     let wrongSquare = null;
     let correctSquare = null;
 
-    // --- STREAMING_CHUNK:Implementing puzzle generator logic ---
-    // --- 기보 무한 랜덤 생성기 (오프닝, 미들게임, 엔드게임 삼중 체제 탑재) ---
     function generateInfinitePuzzle(id) {
-      // 3가지 국면 중 하나를 무작위로 낙점
       const phases = ['opening', 'middlegame', 'endgame'];
       const phase = phases[Math.floor(Math.random() * phases.length)];
 
       if (phase === 'opening') {
-        // 1. 오프닝 빌더
         const preset = OPENING_PRESETS[Math.floor(Math.random() * OPENING_PRESETS.length)];
         const openingBoard = getStandardBoard();
         preset.setup(openingBoard);
@@ -279,7 +247,6 @@
         };
       }
 
-      // 미들게임과 엔드게임은 기물의 갯수 밀도로 차별화하여 조립
       const pieces = [
         { type: 'N', name: 'Knight' },
         { type: 'B', name: 'Bishop' },
@@ -297,7 +264,6 @@
       let valid = false;
       let attempts = 0;
 
-      // 합법적인 화이트 기동선 연출 계산
       while (!valid && attempts < 250) {
         attempts++;
         fromR = Math.floor(Math.random() * 8);
@@ -377,13 +343,11 @@
 
       const isActuallyCapture = (fromC !== toC && piece.type === 'P') || (piece.type !== 'P' && Math.random() > 0.4);
 
-      // 격리 가상 보드판 조립 시작
       const newBoard = Array(8).fill(null).map(() => Array(8).fill(""));
       const forbidden = new Set();
       forbidden.add(`${fromR}-${fromC}`);
       forbidden.add(`${toR}-${toC}`);
 
-      // 슬라이더 기물의 합법 궤적상에 어떠한 기물도 오지 않게 금지 영역 추가
       if (['B', 'R', 'Q'].includes(piece.type)) {
         const dr = Math.sign(toR - fromR);
         const dc = Math.sign(toC - fromC);
@@ -396,7 +360,6 @@
         }
       }
 
-      // 백/흑 필수 킹 배치 (킹과 킹이 서로 맞붙을 수 없게 거리 필터링)
       let wK_R = 7, wK_C = 4, bK_R = 0, bK_C = 4;
 
       if (piece.type === 'K') {
@@ -448,7 +411,6 @@
         }
       }
 
-      // 핵심 문제 피스 안착
       newBoard[fromR][fromC] = colorChar + piece.type;
       
       if (isActuallyCapture) {
@@ -460,8 +422,6 @@
         newBoard[toR][toC] = "";
       }
 
-      // 기물 밀도(Density) 조절부
-      // 미들게임: 흑백 각각 6~8개 기물 활성화 / 엔드게임: 흑백 각각 2개 이하 극소량 조절
       let extraWhiteMax = (phase === 'middlegame') ? 7 : 1;
       let extraBlackMax = (phase === 'middlegame') ? 7 : 1;
 
@@ -503,7 +463,6 @@
         }
       }
 
-      // 기보 생성 로직
       const targetCoord = FILES[toC] + RANKS[toR];
       let notation = "";
       if (piece.type === 'P') {
@@ -537,7 +496,6 @@
       return { r: RANKS.indexOf(coordStr[1]), c: FILES.indexOf(coordStr[0]) };
     };
 
-    // --- 시간 제어 타이머 ---
     function startTimer() {
       if (timerInterval) clearInterval(timerInterval);
       lastStartTime = performance.now();
@@ -556,7 +514,7 @@
       }
     }
 
-    // --- 메인 피드백 알림 연출 (실시간 아나운서 배너 삭제에 따른 알림판 활용) ---
+    // 다음 기보 문구를 화면상에 연출하는 피드백 함수
     function flashFeedback(message, status) {
       const turnBadge = document.getElementById('turnBadge');
       turnBadge.innerText = message;
@@ -575,7 +533,6 @@
       turnBadge.className = "text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5";
     }
 
-    // --- 게임 상태 화면 제어 ---
     function setScreen(state) {
       gameState = state;
       if (state === 'intro') {
@@ -587,7 +544,6 @@
       }
     }
 
-    // --- 일시정지 제어 ---
     function togglePause() {
       if (gameState !== 'playing') return;
       const pauseOverlay = document.getElementById('pauseOverlay');
@@ -613,7 +569,6 @@
       }
     }
 
-    // --- 대국 시작 ---
     function startGame() {
       setScreen('playing');
       
@@ -622,7 +577,6 @@
       bestStreak = 0;
       problemTimes = [];
       selectedCell = null;
-      hintUsed = false;
       isPaused = false;
       wrongSquare = null;
       correctSquare = null;
@@ -639,7 +593,6 @@
       currentPuzzle = generateInfinitePuzzle(puzzId);
       board = currentPuzzle.board;
       selectedCell = null;
-      hintUsed = false;
       wrongSquare = null;
       correctSquare = null;
       accumulatedTime = 0;
@@ -662,7 +615,6 @@
       return (sum / problemTimes.length).toFixed(2);
     }
 
-    // --- 체스 셀 클릭 핸들러 ---
     function handleCellClick(r, c) {
       if (gameState !== 'playing' || !currentPuzzle || isPaused) return;
 
@@ -724,52 +676,34 @@
       }
     }
 
-    // --- 정답 힌트 보기 ---
-    function showHint() {
-      if (gameState !== 'playing' || !currentPuzzle || isPaused) return;
-      hintUsed = true;
-      flashFeedback(`💡 가이드: [${currentPuzzle.from}]에서 [${currentPuzzle.to}]로 이동!`, 'success');
-      renderBoard();
-    }
-
-    // --- STREAMING_CHUNK:Developing board renderer ---
-    // --- 체스판 가상 DOM 렌더러 ---
     function renderBoard() {
       const boardDiv = document.getElementById('chessBoard');
       boardDiv.innerHTML = '';
-
-      const sourceCoords = currentPuzzle ? getCoordsFromNotation(currentPuzzle.from) : null;
-      const targetCoords = currentPuzzle ? getCoordsFromNotation(currentPuzzle.to) : null;
 
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
           const piece = board[r][c];
           const isLight = (r + c) % 2 === 0;
-          const baseBg = isLight ? '#ececd7' : '#739552';
+          const baseBg = isLight ? '#ececd7' : '#386b52';
 
           const isSel = selectedCell?.r === r && selectedCell?.c === c;
           const isWrg = wrongSquare?.r === r && wrongSquare?.c === c;
           const isCor = correctSquare?.r === r && correctSquare?.c === c;
 
+          // 테두리 없이 가상의 오버레이 배경 면색으로만 깔끔하게 유도
           let overlayStyle = "";
           if (isSel) {
-            overlayStyle = "box-shadow: inset 0 0 0 3px #22d3ee; background: #a5f3fc;";
+            overlayStyle = "background: #5dade2;"; 
           } else if (isWrg) {
-            overlayStyle = "box-shadow: inset 0 0 0 3px #ef4444; background: #fca5a5;";
+            overlayStyle = "background: #991b1b;"; 
           } else if (isCor) {
-            overlayStyle = "box-shadow: inset 0 0 0 3px #10b981; background: #a7f3d0;";
+            overlayStyle = "background: #15803d;"; 
           }
-
-          const isHintSrc = hintUsed && sourceCoords?.r === r && sourceCoords?.c === c;
-          const isHintTgt = hintUsed && targetCoords?.r === r && targetCoords?.c === c;
-          if (isHintSrc) overlayStyle = "box-shadow: inset 0 0 0 3px #f59e0b; background: #fef3c7;";
-          if (isHintTgt) overlayStyle = "box-shadow: inset 0 0 0 2px #d97706; border: 2px dashed #f59e0b;";
 
           const cell = document.createElement('div');
           cell.className = "chess-cell";
-          cell.style = `background: ${baseBg}; ${overlayStyle}`;
+          cell.style = `background: ${overlayStyle || baseBg};`;
           
-          // 모바일 반응성을 향상시키기 위해 터치와 클릭 이벤트를 일괄적으로 바인딩
           cell.addEventListener('click', (e) => {
             e.preventDefault();
             handleCellClick(r, c);
@@ -793,43 +727,12 @@
             cell.appendChild(img);
           }
 
-          // 구석 미니 좌표 라벨
-          const labelSpan = document.createElement('span');
-          labelSpan.className = `absolute bottom-[1px] right-[2px] text-[6px] opacity-40 font-black pointer-events-none ${isLight ? 'text-slate-800' : 'text-slate-200'}`;
-          labelSpan.innerText = `${FILES[c]}${RANKS[r]}`;
-          cell.appendChild(labelSpan);
-
           boardDiv.appendChild(cell);
         }
       }
     }
 
-    // --- 좌표축 인덱스 그리기 ---
-    function renderCoords() {
-      const ranksContainer = document.getElementById('ranksContainer');
-      ranksContainer.innerHTML = '';
-      RANKS.forEach(rank => {
-        const d = document.createElement('div');
-        d.className = "h-11 sm:h-12 flex items-center justify-center";
-        d.innerText = rank;
-        ranksContainer.appendChild(d);
-      });
-
-      const filesContainer = document.getElementById('filesContainer');
-      filesContainer.innerHTML = '';
-      FILES.forEach(file => {
-        const d = document.createElement('div');
-        d.className = "w-11 sm:w-12 flex items-center justify-center";
-        d.innerText = file;
-        filesContainer.appendChild(d);
-      });
-    }
-
-    // --- STREAMING_CHUNK:Binding user controls and interface events ---
-    // --- 초기 이벤트 바인딩 ---
     window.onload = function() {
-      renderCoords();
-
       document.getElementById('startBtn').addEventListener('click', startGame);
       document.getElementById('exitBtn').addEventListener('click', () => {
         stopTimer();
@@ -838,7 +741,6 @@
 
       document.getElementById('pauseBtn').addEventListener('click', togglePause);
       document.getElementById('overlayResumeBtn').addEventListener('click', togglePause);
-      document.getElementById('hintBtn').addEventListener('click', showHint);
     }
   </script>
 </body>
