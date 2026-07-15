@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NOTATION INFINITY - CHESS NOTATION HELL</title>
+  <title>체스 좌표 읽기 훈련 - NOTATION INFINITY</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: sans-serif; user-select: none; -webkit-user-select: none; background-color: #222222; }
@@ -14,12 +14,14 @@
 </head>
 <body class="min-h-screen text-neutral-200 flex flex-col items-center justify-between p-4 md:p-6 py-10">
 
+  <div class="w-full max-w-[480px] flex flex-col items-center justify-between flex-1" style="transform: translateY(-20px);">
+
   <!-- 🚀 INTRO SCREEN -->
   <main id="introScreen" class="w-full max-w-[360px] bg-[#333333] border border-neutral-800 rounded-2xl p-6 text-center my-auto shadow-2xl">
-    <h2 class="text-xl font-extrabold text-white mb-6 tracking-tight">무한 체스 좌표 기동 훈련</h2>
+    <h2 class="text-xl font-extrabold text-white mb-6 tracking-tight">체스 좌표 읽기 훈련</h2>
 
     <button id="startBtn" class="w-full py-3 bg-[#386b52] hover:bg-[#28503e] text-white font-black rounded-xl cursor-pointer text-sm transition-all transform active:scale-95 shadow">
-      진짜 실전 훈련 개시하기
+      시작
     </button>
   </main>
 
@@ -91,10 +93,13 @@
 
   <!-- FOOTER -->
   <footer class="w-full max-w-[480px] text-center text-[10px] text-neutral-600 border-t border-neutral-900 pt-3 mt-8">
-    © 2026 NOTATION INFINITY. 무한 트레이닝 지옥에서 빠져나와봐.
+    © 2026 The Garden of Everything
   </footer>
 
+  </div>
+
   <script>
+    // --- STREAMING_CHUNK: Initializing constants and maps... ---
     const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'];
     
@@ -133,6 +138,7 @@
       "대충 찍은 거 다 알아. 계속해봐."
     ];
 
+    // --- STREAMING_CHUNK: Setting up board configurations... ---
     function getStandardBoard() {
       return [
         ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -206,6 +212,7 @@
       }
     ];
 
+    // --- STREAMING_CHUNK: Setting state variables & localStorage loading... ---
     let gameState = 'intro'; 
     let currentIdx = 0;
     let currentPuzzle = null;
@@ -213,9 +220,10 @@
     let selectedCell = null;
     let isPaused = false;
 
+    // 로컬 스토리지 연동하여 데이터 복원
     let currentStreak = 0;
-    let bestStreak = 0;
-    let problemTimes = [];
+    let bestStreak = parseInt(localStorage.getItem('bestStreak')) || 0;
+    let problemTimes = JSON.parse(localStorage.getItem('problemTimes')) || [];
     let timeElapsed = 0.0;
 
     let timerInterval = null;
@@ -225,6 +233,7 @@
     let wrongSquare = null;
     let correctSquare = null;
 
+    // --- STREAMING_CHUNK: Defining procedural puzzle generation... ---
     function generateInfinitePuzzle(id) {
       const phases = ['opening', 'middlegame', 'endgame'];
       const phase = phases[Math.floor(Math.random() * phases.length)];
@@ -496,6 +505,7 @@
       return { r: RANKS.indexOf(coordStr[1]), c: FILES.indexOf(coordStr[0]) };
     };
 
+    // --- STREAMING_CHUNK: Timing functions ... ---
     function startTimer() {
       if (timerInterval) clearInterval(timerInterval);
       lastStartTime = performance.now();
@@ -533,6 +543,7 @@
       turnBadge.className = "text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5";
     }
 
+    // --- STREAMING_CHUNK: Navigating screens... ---
     function setScreen(state) {
       gameState = state;
       if (state === 'intro') {
@@ -569,18 +580,21 @@
       }
     }
 
+    // --- STREAMING_CHUNK: Starting active game session... ---
     function startGame() {
       setScreen('playing');
       
       currentIdx = 0;
       currentStreak = 0;
-      bestStreak = 0;
-      problemTimes = [];
       selectedCell = null;
       isPaused = false;
       wrongSquare = null;
       correctSquare = null;
       accumulatedTime = 0;
+
+      // 최고 기록과 평균 기록 복원
+      bestStreak = parseInt(localStorage.getItem('bestStreak')) || 0;
+      problemTimes = JSON.parse(localStorage.getItem('problemTimes')) || [];
 
       document.getElementById('pauseOverlay').classList.add('hidden');
       document.getElementById('notationBlurContainer').classList.remove('blur-sm');
@@ -615,6 +629,7 @@
       return (sum / problemTimes.length).toFixed(2);
     }
 
+    // --- STREAMING_CHUNK: Handling user cell interaction... ---
     function handleCellClick(r, c) {
       if (gameState !== 'playing' || !currentPuzzle || isPaused) return;
 
@@ -651,10 +666,16 @@
           renderBoard();
 
           currentStreak++;
-          if (currentStreak > bestStreak) bestStreak = currentStreak;
+          if (currentStreak > bestStreak) {
+            bestStreak = currentStreak;
+            localStorage.setItem('bestStreak', bestStreak);
+          }
 
           const finalTime = Number(((accumulatedTime + (performance.now() - lastStartTime)) / 1000).toFixed(2));
           problemTimes.push(finalTime);
+          
+          // 브라우저 딥 세이브 적용
+          localStorage.setItem('problemTimes', JSON.stringify(problemTimes));
 
           const randSucess = SARCASTIC_SUCCESSES[Math.floor(Math.random() * SARCASTIC_SUCCESSES.length)];
           flashFeedback(`✅ 통과! (${finalTime}초) ${randSucess}`, 'success');
@@ -676,6 +697,7 @@
       }
     }
 
+    // --- STREAMING_CHUNK: Dynamic DOM board layout render... ---
     function renderBoard() {
       const boardDiv = document.getElementById('chessBoard');
       boardDiv.innerHTML = '';
@@ -732,6 +754,7 @@
       }
     }
 
+    // --- STREAMING_CHUNK: Binding onload triggers... ---
     window.onload = function() {
       document.getElementById('startBtn').addEventListener('click', startGame);
       document.getElementById('exitBtn').addEventListener('click', () => {
