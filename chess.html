@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chess Notation Trainer - NOTATION INFINITY</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* UI Progress Markers 및 완벽한 반응형 정사각형 보드 연출을 위한 전용 스타일 */
     body { font-family: sans-serif; user-select: none; -webkit-user-select: none; background-color: #222222; }
     .chess-board { display: grid; grid-template-columns: repeat(8, 1fr); width: 100%; max-width: 400px; aspect-ratio: 1 / 1; overflow: hidden; background-color: #222222; border-radius: 8px; }
     .chess-cell { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: all 0.1s ease; width: 100%; }
@@ -14,14 +15,15 @@
 </head>
 <body class="min-h-screen text-neutral-200 flex flex-col items-center justify-between p-4 md:p-6 py-10">
 
+  <!-- 전체 레이아웃을 위로 20px 끌어올리기 위한 컨테이너 조정 -->
   <div class="w-full max-w-[480px] flex flex-col items-center justify-between flex-1" style="transform: translateY(-20px);">
 
   <!-- 🚀 INTRO SCREEN -->
   <main id="introScreen" class="w-full max-w-[360px] bg-[#333333] border border-neutral-800 rounded-2xl p-6 text-center my-auto shadow-2xl">
-    <h2 class="text-xl font-extrabold text-white mb-6 tracking-tight">Chess Notation Trainer</h2>
+    <h2 class="text-xl font-extrabold text-white mb-6 tracking-tight">체스 좌표 읽기 훈련</h2>
 
     <button id="startBtn" class="w-full py-3 bg-[#386b52] hover:bg-[#28503e] text-white font-black rounded-xl cursor-pointer text-sm transition-all transform active:scale-95 shadow">
-      Start
+      시작
     </button>
   </main>
 
@@ -31,27 +33,27 @@
     <!-- 🔥 stats dashboard -->
     <div class="w-full grid grid-cols-4 gap-3">
       <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">🔥 STREAK</div>
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">🔥 스트릭</div>
         <div id="statStreak" class="text-lg font-black text-orange-500">0</div>
       </div>
 
       <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">👑 BEST</div>
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">👑 최고기록</div>
         <div id="statBest" class="text-lg font-black text-amber-500">0</div>
       </div>
 
       <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⏱️ TIME</div>
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⏱️ 소요시간</div>
         <div id="statTime" class="text-lg font-black text-neutral-300 font-mono">0.0s</div>
       </div>
 
       <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⚡ AVERAGE</div>
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⚡ 평균기록</div>
         <div id="statAverage" class="text-lg font-black text-emerald-400 font-mono">0.00s</div>
       </div>
     </div>
 
-    <!-- 🎯 Main target notation displaying board -->
+    <!-- 🎯 Main target notation displaying board (ONLY notation coordinates allowed) -->
     <div class="w-full bg-[#333333] border border-neutral-800 rounded-2xl p-5 text-center relative shadow-lg">
       <div id="notationBlurContainer" class="transition-all duration-350">
         <div id="targetNotation" class="text-4xl font-black text-white font-mono tracking-tight">e4</div>
@@ -64,9 +66,9 @@
       <!-- 🛑 Pause overlay screen -->
       <div id="pauseOverlay" class="overlay-paused hidden">
         <div class="text-3xl mb-2">⏱️</div>
-        <div class="text-base font-black text-white mb-6">Paused</div>
+        <div class="text-base font-black text-white mb-6">일시정지 중</div>
         <button id="overlayResumeBtn" class="px-5 py-2.5 bg-[#386b52] hover:bg-[#28503e] text-white font-extrabold rounded-lg text-xs cursor-pointer shadow">
-          Resume
+          이어하기
         </button>
       </div>
 
@@ -79,11 +81,11 @@
     <div class="w-full flex gap-3">
       <button id="pauseBtn" class="flex-1 py-3.5 bg-[#333333] border border-neutral-800 text-neutral-300 hover:bg-neutral-800 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <span id="pauseBtnText">Pause</span>
+        <span id="pauseBtnText">일시정지</span>
       </button>
 
       <button id="exitBtn" class="flex-1 py-3.5 bg-[#333333] border border-neutral-800 text-neutral-400 hover:bg-neutral-800 text-xs font-semibold rounded-xl cursor-pointer transition-colors">
-        Exit
+        그만두기
       </button>
     </div>
 
@@ -97,7 +99,6 @@
   </div>
 
   <script>
-    // --- STREAMING_CHUNK: Initializing constants and maps... ---
     const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'];
     
@@ -122,21 +123,20 @@
     };
 
     const SARCASTIC_ERRORS = [
-      "Are your eyes just for decoration? That's not the piece!",
-      "Don't scribble on the board, locate the coordinates in your head!",
-      "A complete blunder. Have you ever read chess notation?",
-      "Brain freeze? Think before your fingers move.",
-      "You can never go there, just like your rating!"
+      "눈은 데코레이션이야? 그 피스 아니라고!",
+      "체스판에 낙서하지 말고 제대로 좌표 봐라ㅋㅋ",
+      "완벽한 블런더네. 기보 처음 배워?",
+      "뇌 정지 왔어? 손가락 움직이기 전에 한 번만 더 생각해.",
+      "거긴 절대 갈 수 없는 곳이야. 너의 레이팅처럼 말이지!"
     ];
 
     const SARCASTIC_SUCCESSES = [
-      "Oh, lucky guess?",
-      "Wow, your brain cells are finally working.",
-      "Not bad! But you will definitely fail the next one.",
-      "I know you just randomly tapped. Keep going anyway."
+      "어라? 운이 좋았네?",
+      "오, 뇌세포가 드디어 움직이기 시작했군.",
+      "제법인데? 하지만 다음 문제에서 무조건 틀릴걸?",
+      "대충 찍은 거 다 알아. 계속해봐."
     ];
 
-    // --- STREAMING_CHUNK: Setting up board configurations... ---
     function getStandardBoard() {
       return [
         ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -159,58 +159,57 @@
 
     const OPENING_PRESETS = [
       {
-        title: "Ruy Lopez",
+        title: "루이 로페즈 (Ruy Lopez)",
         setup: (bd) => {
           applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
           applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
         },
         from: "f1", to: "b5", notation: "Bb5",
-        desc: "White moves Bishop to b5 to pressure the Black knight and claim center."
+        desc: "백의 f1 비숍을 b5로 기동하여 흑의 c6 나이트를 압박하고 중앙 우위를 다집니다."
       },
       {
-        title: "Italian Game",
+        title: "이탈리안 게임 (Italian Game)",
         setup: (bd) => {
           applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
           applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
         },
         from: "f1", to: "c4", notation: "Bc4",
-        desc: "White develops the light squared bishop to c4, aiming at the f7 weak spot."
+        desc: "비숍을 c4에 배치하여 흑의 가장 부서지기 쉬운 f7 폰을 즉각 저격합니다."
       },
       {
-        title: "Queen's Gambit",
+        title: "퀸즈 갬빗 (Queen's Gambit)",
         setup: (bd) => {
           applyMove(bd, "d2", "d4"); applyMove(bd, "d7", "d5");
         },
         from: "c2", to: "c4", notation: "c4",
-        desc: "White offers a wing pawn to gain control of the center squares."
+        desc: "c폰을 미끼로 던지는 척하며 중앙 통제권을 틀어쥐는 유서 깊은 빌드입니다."
       },
       {
-        title: "Sicilian Defense: Open",
+        title: "시실리안 디펜스 (Sicilian: Open)",
         setup: (bd) => {
           applyMove(bd, "e2", "e4"); applyMove(bd, "c7", "c5");
           applyMove(bd, "g1", "f3"); applyMove(bd, "d7", "d6");
         },
         from: "d2", to: "d4", notation: "d4",
-        desc: "White blasts open the center with d4, launching an aggressive attacking game."
+        desc: "백이 중앙 d4를 박차고 전진하여 강력한 센터 장악 및 공격 템포를 조율합니다."
       },
       {
-        title: "Scotch Game",
+        title: "스카치 게임 (Scotch Game)",
         setup: (bd) => {
           applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
           applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
         },
         from: "d2", to: "d4", notation: "d4",
-        desc: "White directly challenges Black's e5 pawn, opening up board space early."
+        desc: "초반부터 중앙 d4 공간을 적극적으로 오픈하며 속공 전술의 서막을 엽니다."
       },
       {
-        title: "English Opening",
+        title: "잉글리시 오프닝 (English Opening)",
         setup: (bd) => {}, 
         from: "c2", to: "c4", notation: "c4",
-        desc: "White develops the c-pawn, claiming a flexible flank control of the center."
+        desc: "측면 c폰을 한 칸 더 전진시켜 중앙의 d5 공간을 가로지르는 우아한 측면 압박 오프닝입니다."
       }
     ];
 
-    // --- STREAMING_CHUNK: Setting state variables & localStorage loading... ---
     let gameState = 'intro'; 
     let currentIdx = 0;
     let currentPuzzle = null;
@@ -218,7 +217,7 @@
     let selectedCell = null;
     let isPaused = false;
 
-    // Load metrics from local storage
+    // 로컬스토리지를 통한 영구 통계 보존 연동
     let currentStreak = 0;
     let bestStreak = parseInt(localStorage.getItem('bestStreak')) || 0;
     let problemTimes = JSON.parse(localStorage.getItem('problemTimes')) || [];
@@ -231,7 +230,6 @@
     let wrongSquare = null;
     let correctSquare = null;
 
-    // --- STREAMING_CHUNK: Defining procedural puzzle generation... ---
     function generateInfinitePuzzle(id) {
       const phases = ['opening', 'middlegame', 'endgame'];
       const phase = phases[Math.floor(Math.random() * phases.length)];
@@ -243,7 +241,7 @@
 
         return {
           id,
-          phase: "Opening Phase",
+          phase: "오프닝 상황",
           title: preset.title,
           notation: preset.notation,
           turn: 'White',
@@ -488,13 +486,13 @@
 
       return {
         id,
-        phase: phase === 'middlegame' ? "Middlegame" : "Endgame",
-        title: `White's ${piece.name}`,
+        phase: phase === 'middlegame' ? "미들게임" : "엔드게임",
+        title: `백의 ${piece.name}`,
         notation,
         turn: 'White',
         from: FILES[fromC] + RANKS[fromR],
         to: targetCoord,
-        desc: `Move White's ${piece.name} to ${notation}!`,
+        desc: `백 ${piece.name}을 ${notation}로 이동시켜!`,
         board: newBoard
       };
     }
@@ -503,7 +501,6 @@
       return { r: RANKS.indexOf(coordStr[1]), c: FILES.indexOf(coordStr[0]) };
     };
 
-    // --- STREAMING_CHUNK: Setting up timer functions... ---
     function startTimer() {
       if (timerInterval) clearInterval(timerInterval);
       lastStartTime = performance.now();
@@ -522,7 +519,7 @@
       }
     }
 
-    // Dynamic problem box flashing mechanism (coordinates only)
+    // 직관적인 퀴즈 박스 흔들림 피드백 메커니즘 (테스트 좌표만 활용)
     function flashFeedback(status) {
       const targetNotation = document.getElementById('targetNotation');
       if (status === 'success') {
@@ -539,7 +536,6 @@
       targetNotation.className = "text-4xl font-black text-white font-mono tracking-tight";
     }
 
-    // --- STREAMING_CHUNK: Managing screens and transitions... ---
     function setScreen(state) {
       gameState = state;
       if (state === 'intro') {
@@ -561,7 +557,7 @@
         isPaused = false;
         pauseOverlay.classList.add('hidden');
         notationContainer.classList.remove('blur-sm');
-        btnText.innerText = "Pause";
+        btnText.innerText = "일시정지";
         lastStartTime = performance.now();
         startTimer();
         flashFeedback('normal');
@@ -571,12 +567,11 @@
         isPaused = true;
         pauseOverlay.classList.remove('hidden');
         notationContainer.classList.add('blur-sm');
-        btnText.innerText = "Resume";
+        btnText.innerText = "이어하기";
         flashFeedback('normal');
       }
     }
 
-    // --- STREAMING_CHUNK: Starting active training session... ---
     function startGame() {
       setScreen('playing');
       
@@ -588,13 +583,13 @@
       correctSquare = null;
       accumulatedTime = 0;
 
-      // Restore historical metrics
+      // 역사적인 보전 기록 복구
       bestStreak = parseInt(localStorage.getItem('bestStreak')) || 0;
       problemTimes = JSON.parse(localStorage.getItem('problemTimes')) || [];
 
       document.getElementById('pauseOverlay').classList.add('hidden');
       document.getElementById('notationBlurContainer').classList.remove('blur-sm');
-      document.getElementById('pauseBtnText').innerText = "Pause";
+      document.getElementById('pauseBtnText').innerText = "일시정지";
 
       loadNextPuzzle(1);
     }
@@ -624,7 +619,6 @@
       return (sum / problemTimes.length).toFixed(2);
     }
 
-    // --- STREAMING_CHUNK: Handling block-level cell clicks... ---
     function handleCellClick(r, c) {
       if (gameState !== 'playing' || !currentPuzzle || isPaused) return;
 
@@ -668,6 +662,7 @@
           const finalTime = Number(((accumulatedTime + (performance.now() - lastStartTime)) / 1000).toFixed(2));
           problemTimes.push(finalTime);
           
+          // 로컬 데이터 무한 저장
           localStorage.setItem('problemTimes', JSON.stringify(problemTimes));
 
           setTimeout(() => {
@@ -687,7 +682,6 @@
       }
     }
 
-    // --- STREAMING_CHUNK: Rendering the chess board layout... ---
     function renderBoard() {
       const boardDiv = document.getElementById('chessBoard');
       boardDiv.innerHTML = '';
@@ -702,14 +696,14 @@
           const isWrg = wrongSquare?.r === r && wrongSquare?.c === c;
           const isCor = correctSquare?.r === r && correctSquare?.c === c;
 
-          // Vivid selection color configurations: Selected Cyan, Wrong Coral Red, Correct Neon Green
+          // 보더 장식 없이 고대비 단일 면색(Background)으로만 직관적으로 가이딩
           let overlayStyle = "";
           if (isSel) {
-            overlayStyle = "background: #00e5ff;"; 
+            overlayStyle = "background: #00e5ff;"; // 선명하고 또렷한 Cyan
           } else if (isWrg) {
-            overlayStyle = "background: #ff3d00;"; 
+            overlayStyle = "background: #ff3d00;"; // 직관적인 Coral Red
           } else if (isCor) {
-            overlayStyle = "background: #00e676;"; 
+            overlayStyle = "background: #00e676;"; // 확연한 Neon Green
           }
 
           const cell = document.createElement('div');
@@ -744,7 +738,6 @@
       }
     }
 
-    // --- STREAMING_CHUNK: Registering load triggers... ---
     window.onload = function() {
       document.getElementById('startBtn').addEventListener('click', startGame);
       document.getElementById('exitBtn').addEventListener('click', () => {
