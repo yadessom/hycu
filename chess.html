@@ -132,7 +132,7 @@
       bK: '♚', bQ: '♛', bR: '♜', bB: '♝', bN: '♞', bP: '♟'
     };
 
-    // 정교하게 동일 렌더링을 보장하는 고품질 벡터 SVG 이미지 매핑 (Wikimedia Commons)
+    // 전 세계 공통 고해상도 SVG 이미지 매핑
     const PIECE_IMAGES = {
       wK: 'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg',
       wQ: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg',
@@ -184,7 +184,7 @@
     let wrongSquare = null;
     let correctSquare = null;
 
-    // --- 기보 무한 랜덤 생성기 (항상 백의 차례로 하드코딩) ---
+    // --- 기보 무한 랜덤 생성기 (체스 합법 행마 및 기물 개수 극도의 통제) ---
     function generateInfinitePuzzle(id) {
       const pieces = [
         { type: 'N', name: 'Knight' },
@@ -196,152 +196,240 @@
       ];
 
       const piece = pieces[Math.floor(Math.random() * pieces.length)];
-      // 항상 백의 훈련만 되도록 보장
-      const isWhite = true;
+      const isWhite = true; // 무조건 백의 차례
       const colorChar = 'w';
       const oppColorChar = 'b';
 
-      let fromR = Math.floor(Math.random() * 8);
-      let fromC = Math.floor(Math.random() * 8);
-      let validTargets = [];
+      let fromR = 0, fromC = 0, toR = 0, toC = 0;
+      let valid = false;
+      let attempts = 0;
 
-      if (piece.type === 'N') {
-        const moves = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
-        moves.forEach(([dr, dc]) => {
-          const nr = fromR + dr, nc = fromC + dc;
-          if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) validTargets.push({ r: nr, c: nc });
-        });
-      } else if (piece.type === 'B') {
-        const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
-        dirs.forEach(([dr, dc]) => {
-          let step = 1;
-          while (true) {
-            const nr = fromR + dr * step, nc = fromC + dc * step;
-            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && step <= 4) {
-              validTargets.push({ r: nr, c: nc });
-              step++;
-            } else break;
+      // 1. 합법 행마 좌표계 산출 (attempts 방어코드 탑재)
+      while (!valid && attempts < 200) {
+        attempts++;
+        fromR = Math.floor(Math.random() * 8);
+        fromC = Math.floor(Math.random() * 8);
+
+        // 폰은 1열과 8열에 시작 자체가 불가능
+        if (piece.type === 'P' && (fromR === 0 || fromR === 7)) continue;
+
+        const isCapture = Math.random() > 0.4;
+        let moves = [];
+
+        if (piece.type === 'P') {
+          if (isCapture) {
+            // 폰은 잡을 때 오직 대각선으로만 갈 수 있음 (White는 위쪽행으로 전진하므로 r - 1)
+            const nextR = fromR - 1;
+            if (nextR >= 0) {
+              if (fromC - 1 >= 0) moves.push({ r: nextR, c: fromC - 1 });
+              if (fromC + 1 < 8) moves.push({ r: nextR, c: fromC + 1 });
+            }
+          } else {
+            // 잡지 않을 때는 오직 전진만 가능
+            const nextR1 = fromR - 1;
+            if (nextR1 >= 0) {
+              moves.push({ r: nextR1, c: fromC });
+              if (fromR === 6) { // 백폰 스타트지점에서의 더블 스텝
+                moves.push({ r: fromR - 2, c: fromC });
+              }
+            }
           }
-        });
-      } else if (piece.type === 'R') {
-        const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-        dirs.forEach(([dr, dc]) => {
-          let step = 1;
-          while (true) {
-            const nr = fromR + dr * step, nc = fromC + dc * step;
-            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && step <= 4) {
-              validTargets.push({ r: nr, c: nc });
-              step++;
-            } else break;
-          }
-        });
-      } else if (piece.type === 'Q') {
-        const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1], [-1, 0], [1, 0], [0, -1], [0, 1]];
-        dirs.forEach(([dr, dc]) => {
-          let step = 1;
-          while (true) {
-            const nr = fromR + dr * step, nc = fromC + dc * step;
-            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && step <= 3) {
-              validTargets.push({ r: nr, c: nc });
-              step++;
-            } else break;
-          }
-        });
-      } else if (piece.type === 'K') {
-        const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1], [-1, 0], [1, 0], [0, -1], [0, 1]];
-        dirs.forEach(([dr, dc]) => {
-          const nr = fromR + dr, nc = fromC + dc;
-          if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) validTargets.push({ r: nr, c: nc });
-        });
-      } else { // Pawn
-        const dir = -1; // 백은 위쪽 인덱스로 전진
-        const startRank = 6; // 2열 (0-based 인덱스 6)
-        const nr1 = fromR + dir;
-        if (nr1 >= 0 && nr1 < 8) {
-          validTargets.push({ r: nr1, c: fromC });
-          if (fromR === startRank) {
-            const nr2 = fromR + dir * 2;
-            if (nr2 >= 0 && nr2 < 8) validTargets.push({ r: nr2, c: fromC });
-          }
+        } else if (piece.type === 'N') {
+          const lMoves = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+          lMoves.forEach(([dr, dc]) => {
+            const nr = fromR + dr, nc = fromC + dc;
+            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) moves.push({ r: nr, c: nc });
+          });
+        } else if (piece.type === 'B') {
+          const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+          dirs.forEach(([dr, dc]) => {
+            for (let step = 1; step < 8; step++) {
+              const nr = fromR + dr * step, nc = fromC + dc * step;
+              if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) moves.push({ r: nr, c: nc });
+              else break;
+            }
+          });
+        } else if (piece.type === 'R') {
+          const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+          dirs.forEach(([dr, dc]) => {
+            for (let step = 1; step < 8; step++) {
+              const nr = fromR + dr * step, nc = fromC + dc * step;
+              if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) moves.push({ r: nr, c: nc });
+              else break;
+            }
+          });
+        } else if (piece.type === 'Q') {
+          const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1], [-1, 0], [1, 0], [0, -1], [0, 1]];
+          dirs.forEach(([dr, dc]) => {
+            for (let step = 1; step < 8; step++) {
+              const nr = fromR + dr * step, nc = fromC + dc * step;
+              if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) moves.push({ r: nr, c: nc });
+              else break;
+            }
+          });
+        } else if (piece.type === 'K') {
+          const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1], [-1, 0], [1, 0], [0, -1], [0, 1]];
+          dirs.forEach(([dr, dc]) => {
+            const nr = fromR + dr, nc = fromC + dc;
+            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) moves.push({ r: nr, c: nc });
+          });
+        }
+
+        if (moves.length > 0) {
+          const chosenMove = moves[Math.floor(Math.random() * moves.length)];
+          toR = chosenMove.r;
+          toC = chosenMove.c;
+          valid = true;
         }
       }
 
-      if (validTargets.length === 0) {
-        fromR = 6;
-        fromC = 4;
-        validTargets.push({ r: 4, c: 4 });
+      if (!valid) {
+        // 비상탈출용 정적 폴백
+        fromR = 6; fromC = 4; toR = 4; toC = 4;
       }
 
-      const target = validTargets[Math.floor(Math.random() * validTargets.length)];
-      const isCapture = Math.random() > 0.4 && piece.type !== 'P';
+      const isActuallyCapture = (fromC !== toC && piece.type === 'P') || (piece.type !== 'P' && Math.random() > 0.4);
 
+      // 2. 가상 보드판 빌드 및 금지 타일(이동 경로/출발/목적지) 격리
       const newBoard = Array(8).fill(null).map(() => Array(8).fill(""));
       const forbidden = new Set();
       forbidden.add(`${fromR}-${fromC}`);
-      forbidden.add(`${target.r}-${target.c}`);
+      forbidden.add(`${toR}-${toC}`);
 
+      // 슬라이딩 기물의 경로를 forbidden에 집어넣어 decorative 기물들이 절대 이 위를 가로막지 않도록 보장 (합법 행마 유지)
       if (['B', 'R', 'Q'].includes(piece.type)) {
-        const dr = Math.sign(target.r - fromR);
-        const dc = Math.sign(target.c - fromC);
+        const dr = Math.sign(toR - fromR);
+        const dc = Math.sign(toC - fromC);
         let currR = fromR + dr;
         let currC = fromC + dc;
-        while (currR !== target.r || currC !== target.c) {
+        while (currR !== toR || currC !== toC) {
           forbidden.add(`${currR}-${currC}`);
           currR += dr;
           currC += dc;
         }
       }
 
-      let wKingPlaced = (piece.type === 'K' && isWhite);
-      let bKingPlaced = (piece.type === 'K' && !isWhite);
+      // 3. 백과 흑의 킹(King)은 각각 반드시 '딱 1개씩만' 안전한 외딴 영역에 배치
+      let wK_R = 7, wK_C = 4, bK_R = 0, bK_C = 4;
 
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          if (forbidden.has(`${r}-${c}`)) continue;
-          if (!wKingPlaced && r >= 6) {
+      if (piece.type === 'K') {
+        wK_R = fromR; wK_C = fromC;
+      } else {
+        let wK_placed = false;
+        while (!wK_placed) {
+          const r = Math.floor(Math.random() * 8);
+          const c = Math.floor(Math.random() * 8);
+          if (!forbidden.has(`${r}-${c}`)) {
             newBoard[r][c] = 'wK';
             forbidden.add(`${r}-${c}`);
-            wKingPlaced = true;
-          } else if (!bKingPlaced && r <= 1) {
-            newBoard[r][c] = 'bK';
-            forbidden.add(`${r}-${c}`);
-            bKingPlaced = true;
+            wK_R = r; wK_C = c;
+            wK_placed = true;
           }
         }
       }
 
-      const piecePool = [
-        'wP', 'wP', 'wP', 'wP', 'wN', 'wB', 'wR', 'wQ',
-        'bP', 'bP', 'bP', 'bP', 'bN', 'bB', 'bR', 'bQ'
-      ];
+      // 흑의 킹을 배치하되 백의 킹 또는 백 킹이 이동할 타겟 영역에 인접하여 불법 상황을 야기하지 않도록 거리 필터 적용
+      let bK_placed = false;
+      let bK_attempts = 0;
+      while (!bK_placed && bK_attempts < 150) {
+        bK_attempts++;
+        const r = Math.floor(Math.random() * 8);
+        const c = Math.floor(Math.random() * 8);
+        
+        const adjacentToWK_Start = Math.abs(r - wK_R) <= 1 && Math.abs(c - wK_C) <= 1;
+        const adjacentToWK_Target = Math.abs(r - toR) <= 1 && Math.abs(c - toC) <= 1;
 
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          if (forbidden.has(`${r}-${c}`)) continue;
-          if (Math.random() < 0.35) {
-            const randomPiece = piecePool[Math.floor(Math.random() * piecePool.length)];
-            if (randomPiece.endsWith('P') && (r === 0 || r === 7)) continue;
-            if (randomPiece.endsWith('K')) continue;
-            newBoard[r][c] = randomPiece;
+        if (!forbidden.has(`${r}-${c}`) && !adjacentToWK_Start && !adjacentToWK_Target) {
+          newBoard[r][c] = 'bK';
+          forbidden.add(`${r}-${c}`);
+          bK_R = r; bK_C = c;
+          bK_placed = true;
+        }
+      }
+      
+      if (!bK_placed) {
+        // 비상용 bK 강제 타격 배치
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            if (!forbidden.has(`${r}-${c}`)) {
+              newBoard[r][c] = 'bK';
+              forbidden.add(`${r}-${c}`);
+              bK_R = r; bK_C = c;
+              bK_placed = true;
+              break;
+            }
           }
+          if (bK_placed) break;
         }
       }
 
+      // 4. 활성 백 기물 및 타겟 배치
       newBoard[fromR][fromC] = colorChar + piece.type;
       
-      if (isCapture) {
-        const defenderType = Math.random() > 0.5 ? 'P' : ['N', 'B', 'R', 'Q'][Math.floor(Math.random() * 4)];
-        newBoard[target.r][target.c] = oppColorChar + defenderType;
+      if (isActuallyCapture) {
+        const bPieces = ['P', 'N', 'B', 'R', 'Q'];
+        let bType = bPieces[Math.floor(Math.random() * bPieces.length)];
+        // 폰은 끝열에 배치 불가능
+        if (bType === 'P' && (toR === 0 || toR === 7)) bType = 'N';
+        newBoard[toR][toC] = 'b' + bType;
       } else {
-        newBoard[target.r][target.c] = "";
+        newBoard[toR][toC] = "";
       }
 
+      // 5. 흑과 백의 기타 기물 개수 극도로 조여서 배치 (각 사이드 당 최대 2개 이하만)
+      let currentWhiteNonKing = (piece.type !== 'K') ? 1 : 0;
+      let currentBlackNonKing = isActuallyCapture ? 1 : 0;
+
+      const maxExtraWhite = 2 - currentWhiteNonKing; 
+      const maxExtraBlack = 2 - currentBlackNonKing; 
+
+      const numExtraWhite = Math.floor(Math.random() * (maxExtraWhite + 1));
+      const numExtraBlack = Math.floor(Math.random() * (maxExtraBlack + 1));
+
+      const wPool = ['wP', 'wN', 'wB', 'wR', 'wQ'];
+      const bPool = ['bP', 'bN', 'bB', 'bR', 'bQ'];
+
+      let extraWhitePlaced = 0, placeAttempts = 0;
+      while (extraWhitePlaced < numExtraWhite && placeAttempts < 50) {
+        placeAttempts++;
+        const r = Math.floor(Math.random() * 8);
+        const c = Math.floor(Math.random() * 8);
+        if (!forbidden.has(`${r}-${c}`)) {
+          const p = wPool[Math.floor(Math.random() * wPool.length)];
+          if (p.endsWith('P') && (r === 0 || r === 7)) continue;
+          newBoard[r][c] = p;
+          forbidden.add(`${r}-${c}`);
+          extraWhitePlaced++;
+        }
+      }
+
+      let extraBlackPlaced = 0; placeAttempts = 0;
+      while (extraBlackPlaced < numExtraBlack && placeAttempts < 50) {
+        placeAttempts++;
+        const r = Math.floor(Math.random() * 8);
+        const c = Math.floor(Math.random() * 8);
+        const distToWK = Math.max(Math.abs(r - wK_R), Math.abs(c - wK_C));
+        if (!forbidden.has(`${r}-${c}`) && distToWK > 1) {
+          const p = bPool[Math.floor(Math.random() * bPool.length)];
+          if (p.endsWith('P') && (r === 0 || r === 7)) continue;
+          newBoard[r][c] = p;
+          forbidden.add(`${r}-${c}`);
+          extraBlackPlaced++;
+        }
+      }
+
+      // 6. 정확한 공식 체스 기보 생성 규칙 수립
       const targetCoord = FILES[target.c] + RANKS[target.r];
       let notation = "";
       if (piece.type === 'P') {
-        notation = targetCoord;
+        if (isActuallyCapture) {
+          // 폰 캡처 시: axb5, cxd4 등 출발 파일 명시 필수 규칙 준수
+          notation = FILES[fromC] + 'x' + targetCoord;
+        } else {
+          notation = targetCoord;
+        }
       } else {
-        notation = piece.type + (isCapture ? 'x' : '') + targetCoord;
+        notation = piece.type + (isActuallyCapture ? 'x' : '') + targetCoord;
       }
 
       if (Math.random() > 0.8 && piece.type !== 'K') {
@@ -553,7 +641,7 @@
       renderBoard();
     }
 
-    // --- 체스판 가상 DOM 렌더러 (벡터 이미지 렌더링 및 에러 폰트백 폴백 탑재) ---
+    // --- 체스판 가상 DOM 렌더러 ---
     function renderBoard() {
       const boardDiv = document.getElementById('chessBoard');
       boardDiv.innerHTML = '';
@@ -595,7 +683,6 @@
             img.src = PIECE_IMAGES[piece];
             img.className = "w-[85%] h-[85%] object-contain select-none pointer-events-none";
             
-            // 네트워크 순단 또는 이미지 오류 시, OS 고유의 유니코드 텍스트로 자연스럽게 폴백 처리함
             img.onerror = () => {
               img.remove();
               const span = document.createElement('span');
