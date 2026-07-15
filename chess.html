@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>체스 좌표 읽기 훈련 - NOTATION INFINITY</title>
+  <title>Chess Notation Trainer - NOTATION INFINITY</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: sans-serif; user-select: none; -webkit-user-select: none; background-color: #222222; }
@@ -18,74 +18,72 @@
 
   <!-- 🚀 INTRO SCREEN -->
   <main id="introScreen" class="w-full max-w-[360px] bg-[#333333] border border-neutral-800 rounded-2xl p-6 text-center my-auto shadow-2xl">
-    <h2 class="text-xl font-extrabold text-white mb-6 tracking-tight">체스 좌표 읽기 훈련</h2>
+    <h2 class="text-xl font-extrabold text-white mb-6 tracking-tight">Chess Notation Trainer</h2>
 
     <button id="startBtn" class="w-full py-3 bg-[#386b52] hover:bg-[#28503e] text-white font-black rounded-xl cursor-pointer text-sm transition-all transform active:scale-95 shadow">
-      시작
+      Start
     </button>
   </main>
 
   <!-- 🎮 PLAYING SCREEN -->
   <main id="playingScreen" class="w-full max-w-[480px] flex flex-col gap-6 my-auto py-2 hidden">
     
-    <!-- 🔥 콤팩트 스태츠 대시보드 -->
+    <!-- 🔥 stats dashboard -->
     <div class="w-full grid grid-cols-4 gap-3">
       <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">🔥 스트릭</div>
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">🔥 STREAK</div>
         <div id="statStreak" class="text-lg font-black text-orange-500">0</div>
       </div>
 
       <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">👑 최고기록</div>
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">👑 BEST</div>
         <div id="statBest" class="text-lg font-black text-amber-500">0</div>
       </div>
 
       <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⏱️ 소요시간</div>
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⏱️ TIME</div>
         <div id="statTime" class="text-lg font-black text-neutral-300 font-mono">0.0s</div>
       </div>
 
       <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
-        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⚡ 평균기록</div>
+        <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">⚡ AVERAGE</div>
         <div id="statAverage" class="text-lg font-black text-emerald-400 font-mono">0.00s</div>
       </div>
     </div>
 
-    <!-- 🎯 기보 메인 알림판 -->
+    <!-- 🎯 Main target notation displaying board -->
     <div class="w-full bg-[#333333] border border-neutral-800 rounded-2xl p-5 text-center relative shadow-lg">
       <div id="notationBlurContainer" class="transition-all duration-350">
-        <div id="turnBadge" class="text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5 transition-all">다음 기보를 읽어라 (백 차례)</div>
         <div id="targetNotation" class="text-4xl font-black text-white font-mono tracking-tight">e4</div>
-        <div id="stageBadge" class="text-[9px] text-neutral-400 mt-1 font-semibold uppercase tracking-wider">상황 파악 중...</div>
       </div>
     </div>
 
-    <!-- 🏁 체스판 레이아웃 -->
+    <!-- 🏁 Chess board container -->
     <div class="relative overflow-hidden flex flex-col items-center justify-center w-full my-2">
       
-      <!-- 🛑 일시정지 오버레이 블러 스크린 -->
+      <!-- 🛑 Pause overlay screen -->
       <div id="pauseOverlay" class="overlay-paused hidden">
         <div class="text-3xl mb-2">⏱️</div>
-        <div class="text-base font-black text-white mb-6">일시정지 중</div>
+        <div class="text-base font-black text-white mb-6">Paused</div>
         <button id="overlayResumeBtn" class="px-5 py-2.5 bg-[#386b52] hover:bg-[#28503e] text-white font-extrabold rounded-lg text-xs cursor-pointer shadow">
-          이어하기
+          Resume
         </button>
       </div>
 
-      <!-- 8x8 실제 보드판 -->
+      <!-- 8x8 actual grid board -->
       <div id="chessBoard" class="chess-board"></div>
 
     </div>
 
-    <!-- 🛠️ 제어 버튼 셋 -->
+    <!-- 🛠️ control buttons -->
     <div class="w-full flex gap-3">
       <button id="pauseBtn" class="flex-1 py-3.5 bg-[#333333] border border-neutral-800 text-neutral-300 hover:bg-neutral-800 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <span id="pauseBtnText">일시정지</span>
+        <span id="pauseBtnText">Pause</span>
       </button>
 
       <button id="exitBtn" class="flex-1 py-3.5 bg-[#333333] border border-neutral-800 text-neutral-400 hover:bg-neutral-800 text-xs font-semibold rounded-xl cursor-pointer transition-colors">
-        그만두기
+        Exit
       </button>
     </div>
 
@@ -124,18 +122,18 @@
     };
 
     const SARCASTIC_ERRORS = [
-      "눈은 데코레이션이야? 그 피스 아니라고!",
-      "체스판에 낙서하지 말고 제대로 머릿속 좌표 봐라ㅋㅋ",
-      "완벽한 블런더네. 기보 처음 배워?",
-      "뇌 정지 왔어? 손가락 움직이기 전에 한 번만 더 생각해.",
-      "거긴 절대 갈 수 없는 곳이야. 너의 레이팅처럼 말이지!"
+      "Are your eyes just for decoration? That's not the piece!",
+      "Don't scribble on the board, locate the coordinates in your head!",
+      "A complete blunder. Have you ever read chess notation?",
+      "Brain freeze? Think before your fingers move.",
+      "You can never go there, just like your rating!"
     ];
 
     const SARCASTIC_SUCCESSES = [
-      "어라? 운이 좋았네?",
-      "오, 뇌세포가 드디어 움직이기 시작했군.",
-      "제법인데? 하지만 다음 문제에서 무조건 틀릴걸?",
-      "대충 찍은 거 다 알아. 계속해봐."
+      "Oh, lucky guess?",
+      "Wow, your brain cells are finally working.",
+      "Not bad! But you will definitely fail the next one.",
+      "I know you just randomly tapped. Keep going anyway."
     ];
 
     // --- STREAMING_CHUNK: Setting up board configurations... ---
@@ -161,54 +159,54 @@
 
     const OPENING_PRESETS = [
       {
-        title: "루이 로페즈 (Ruy Lopez)",
+        title: "Ruy Lopez",
         setup: (bd) => {
           applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
           applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
         },
         from: "f1", to: "b5", notation: "Bb5",
-        desc: "백의 f1 비숍을 b5로 기동하여 흑의 c6 나이트를 압박하고 중앙 우위를 다집니다."
+        desc: "White moves Bishop to b5 to pressure the Black knight and claim center."
       },
       {
-        title: "이탈리안 게임 (Italian Game)",
+        title: "Italian Game",
         setup: (bd) => {
           applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
           applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
         },
         from: "f1", to: "c4", notation: "Bc4",
-        desc: "비숍을 c4에 배치하여 흑의 가장 부서지기 쉬운 f7 폰을 즉각 저격합니다."
+        desc: "White develops the light squared bishop to c4, aiming at the f7 weak spot."
       },
       {
-        title: "퀸즈 갬빗 (Queen's Gambit)",
+        title: "Queen's Gambit",
         setup: (bd) => {
           applyMove(bd, "d2", "d4"); applyMove(bd, "d7", "d5");
         },
         from: "c2", to: "c4", notation: "c4",
-        desc: "c폰을 미끼로 던지는 척하며 중앙 통제권을 틀어쥐는 유서 깊은 빌드입니다."
+        desc: "White offers a wing pawn to gain control of the center squares."
       },
       {
-        title: "시실리안 디펜스 (Sicilian: Open)",
+        title: "Sicilian Defense: Open",
         setup: (bd) => {
           applyMove(bd, "e2", "e4"); applyMove(bd, "c7", "c5");
           applyMove(bd, "g1", "f3"); applyMove(bd, "d7", "d6");
         },
         from: "d2", to: "d4", notation: "d4",
-        desc: "백이 중앙 d4를 박차고 전진하여 강력한 센터 장악 및 공격 템포를 조율합니다."
+        desc: "White blasts open the center with d4, launching an aggressive attacking game."
       },
       {
-        title: "스카치 게임 (Scotch Game)",
+        title: "Scotch Game",
         setup: (bd) => {
           applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
           applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
         },
         from: "d2", to: "d4", notation: "d4",
-        desc: "초반부터 중앙 d4 공간을 적극적으로 오픈하며 속공 전술의 서막을 엽니다."
+        desc: "White directly challenges Black's e5 pawn, opening up board space early."
       },
       {
-        title: "잉글리시 오프닝 (English Opening)",
+        title: "English Opening",
         setup: (bd) => {}, 
         from: "c2", to: "c4", notation: "c4",
-        desc: "측면 c폰을 한 칸 더 전진시켜 중앙의 d5 공간을 가로지르는 우아한 측면 압박 오프닝입니다."
+        desc: "White develops the c-pawn, claiming a flexible flank control of the center."
       }
     ];
 
@@ -220,7 +218,7 @@
     let selectedCell = null;
     let isPaused = false;
 
-    // 로컬 스토리지 연동하여 데이터 복원
+    // Load metrics from local storage
     let currentStreak = 0;
     let bestStreak = parseInt(localStorage.getItem('bestStreak')) || 0;
     let problemTimes = JSON.parse(localStorage.getItem('problemTimes')) || [];
@@ -245,7 +243,7 @@
 
         return {
           id,
-          phase: "오프닝 (Opening) 상황",
+          phase: "Opening Phase",
           title: preset.title,
           notation: preset.notation,
           turn: 'White',
@@ -490,13 +488,13 @@
 
       return {
         id,
-        phase: phase === 'middlegame' ? "미들게임 (Middlegame) 상황" : "엔드게임 (Endgame) 상황",
-        title: `백의 ${piece.name}`,
+        phase: phase === 'middlegame' ? "Middlegame" : "Endgame",
+        title: `White's ${piece.name}`,
         notation,
         turn: 'White',
         from: FILES[fromC] + RANKS[fromR],
         to: targetCoord,
-        desc: `백 ${piece.name}을 ${notation}로 이동시켜!`,
+        desc: `Move White's ${piece.name} to ${notation}!`,
         board: newBoard
       };
     }
@@ -505,7 +503,7 @@
       return { r: RANKS.indexOf(coordStr[1]), c: FILES.indexOf(coordStr[0]) };
     };
 
-    // --- STREAMING_CHUNK: Timing functions ... ---
+    // --- STREAMING_CHUNK: Setting up timer functions... ---
     function startTimer() {
       if (timerInterval) clearInterval(timerInterval);
       lastStartTime = performance.now();
@@ -524,26 +522,24 @@
       }
     }
 
-    // 다음 기보 문구를 화면상에 연출하는 피드백 함수
-    function flashFeedback(message, status) {
-      const turnBadge = document.getElementById('turnBadge');
-      turnBadge.innerText = message;
+    // Dynamic problem box flashing mechanism (coordinates only)
+    function flashFeedback(status) {
+      const targetNotation = document.getElementById('targetNotation');
       if (status === 'success') {
-        turnBadge.className = "text-[11px] text-emerald-400 font-extrabold tracking-widest mb-1.5 animate-pulse";
+        targetNotation.className = "text-4xl font-black text-green-400 font-mono tracking-tight animate-pulse";
       } else if (status === 'error') {
-        turnBadge.className = "text-[11px] text-rose-500 font-extrabold tracking-widest mb-1.5 animate-bounce";
+        targetNotation.className = "text-4xl font-black text-red-500 font-mono tracking-tight animate-bounce";
       } else {
-        turnBadge.className = "text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5";
+        targetNotation.className = "text-4xl font-black text-white font-mono tracking-tight";
       }
     }
 
     function resetFeedback() {
-      const turnBadge = document.getElementById('turnBadge');
-      turnBadge.innerText = "다음 기보를 읽어라 (백 차례)";
-      turnBadge.className = "text-[10px] text-emerald-400 font-bold tracking-widest mb-1.5";
+      const targetNotation = document.getElementById('targetNotation');
+      targetNotation.className = "text-4xl font-black text-white font-mono tracking-tight";
     }
 
-    // --- STREAMING_CHUNK: Navigating screens... ---
+    // --- STREAMING_CHUNK: Managing screens and transitions... ---
     function setScreen(state) {
       gameState = state;
       if (state === 'intro') {
@@ -565,22 +561,22 @@
         isPaused = false;
         pauseOverlay.classList.add('hidden');
         notationContainer.classList.remove('blur-sm');
-        btnText.innerText = "일시정지";
+        btnText.innerText = "Pause";
         lastStartTime = performance.now();
         startTimer();
-        flashFeedback("다시 타이머 작동 중!", 'normal');
+        flashFeedback('normal');
       } else {
         stopTimer();
         accumulatedTime += (performance.now() - lastStartTime);
         isPaused = true;
         pauseOverlay.classList.remove('hidden');
         notationContainer.classList.add('blur-sm');
-        btnText.innerText = "이어하기";
-        flashFeedback("일시정지 상태", 'normal');
+        btnText.innerText = "Resume";
+        flashFeedback('normal');
       }
     }
 
-    // --- STREAMING_CHUNK: Starting active game session... ---
+    // --- STREAMING_CHUNK: Starting active training session... ---
     function startGame() {
       setScreen('playing');
       
@@ -592,13 +588,13 @@
       correctSquare = null;
       accumulatedTime = 0;
 
-      // 최고 기록과 평균 기록 복원
+      // Restore historical metrics
       bestStreak = parseInt(localStorage.getItem('bestStreak')) || 0;
       problemTimes = JSON.parse(localStorage.getItem('problemTimes')) || [];
 
       document.getElementById('pauseOverlay').classList.add('hidden');
       document.getElementById('notationBlurContainer').classList.remove('blur-sm');
-      document.getElementById('pauseBtnText').innerText = "일시정지";
+      document.getElementById('pauseBtnText').innerText = "Pause";
 
       loadNextPuzzle(1);
     }
@@ -613,7 +609,6 @@
 
       resetFeedback();
       document.getElementById('targetNotation').innerText = currentPuzzle.notation;
-      document.getElementById('stageBadge').innerText = `${currentPuzzle.phase} : ${currentPuzzle.title}`;
       
       document.getElementById('statStreak').innerText = currentStreak;
       document.getElementById('statBest').innerText = bestStreak;
@@ -629,7 +624,7 @@
       return (sum / problemTimes.length).toFixed(2);
     }
 
-    // --- STREAMING_CHUNK: Handling user cell interaction... ---
+    // --- STREAMING_CHUNK: Handling block-level cell clicks... ---
     function handleCellClick(r, c) {
       if (gameState !== 'playing' || !currentPuzzle || isPaused) return;
 
@@ -640,19 +635,18 @@
         if (r === sourceCoords.r && c === sourceCoords.c) {
           selectedCell = { r, c };
           wrongSquare = null;
-          flashFeedback("🎯 정확해! 이제 목적지 좌표를 터치해!", 'success');
+          flashFeedback('success');
           renderBoard();
         } else {
           wrongSquare = { r, c };
           renderBoard();
           setTimeout(() => { wrongSquare = null; renderBoard(); }, 600);
-          const randMsg = SARCASTIC_ERRORS[Math.floor(Math.random() * SARCASTIC_ERRORS.length)];
-          flashFeedback(`❌ ${randMsg}`, 'error');
+          flashFeedback('error');
         }
       } else {
         if (r === selectedCell.r && c === selectedCell.c) {
           selectedCell = null;
-          flashFeedback("기물 선택 취소됨.", 'normal');
+          flashFeedback('normal');
           renderBoard();
           return;
         }
@@ -674,11 +668,7 @@
           const finalTime = Number(((accumulatedTime + (performance.now() - lastStartTime)) / 1000).toFixed(2));
           problemTimes.push(finalTime);
           
-          // 브라우저 딥 세이브 적용
           localStorage.setItem('problemTimes', JSON.stringify(problemTimes));
-
-          const randSucess = SARCASTIC_SUCCESSES[Math.floor(Math.random() * SARCASTIC_SUCCESSES.length)];
-          flashFeedback(`✅ 통과! (${finalTime}초) ${randSucess}`, 'success');
 
           setTimeout(() => {
             currentIdx++;
@@ -691,13 +681,13 @@
           setTimeout(() => { wrongSquare = null; renderBoard(); }, 600);
           selectedCell = null;
           currentStreak = 0;
-          flashFeedback("💥 목적지 오답! 스트릭 폭발!", 'error');
+          flashFeedback('error');
           renderBoard();
         }
       }
     }
 
-    // --- STREAMING_CHUNK: Dynamic DOM board layout render... ---
+    // --- STREAMING_CHUNK: Rendering the chess board layout... ---
     function renderBoard() {
       const boardDiv = document.getElementById('chessBoard');
       boardDiv.innerHTML = '';
@@ -712,14 +702,14 @@
           const isWrg = wrongSquare?.r === r && wrongSquare?.c === c;
           const isCor = correctSquare?.r === r && correctSquare?.c === c;
 
-          // 테두리 없이 가상의 오버레이 배경 면색으로만 깔끔하게 유도
+          // Vivid selection color configurations: Selected Cyan, Wrong Coral Red, Correct Neon Green
           let overlayStyle = "";
           if (isSel) {
-            overlayStyle = "background: #5dade2;"; 
+            overlayStyle = "background: #00e5ff;"; 
           } else if (isWrg) {
-            overlayStyle = "background: #991b1b;"; 
+            overlayStyle = "background: #ff3d00;"; 
           } else if (isCor) {
-            overlayStyle = "background: #15803d;"; 
+            overlayStyle = "background: #00e676;"; 
           }
 
           const cell = document.createElement('div');
@@ -754,7 +744,7 @@
       }
     }
 
-    // --- STREAMING_CHUNK: Binding onload triggers... ---
+    // --- STREAMING_CHUNK: Registering load triggers... ---
     window.onload = function() {
       document.getElementById('startBtn').addEventListener('click', startGame);
       document.getElementById('exitBtn').addEventListener('click', () => {
