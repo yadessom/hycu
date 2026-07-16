@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chess Notation Trainer - NOTATION INFINITY</title>
+  <title>체스 좌표 읽기 훈련</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%23222'/><rect x='20' y='20' width='70' height='70' fill='%23ececd7'/><rect x='90' y='20' width='70' height='70' fill='%23386b52'/><rect x='20' y='90' width='70' height='70' fill='%23386b52'/><rect x='90' y='90' width='70' height='70' fill='%23ececd7'/><path d='M90 40c-25 0-35 15-35 35 0 10 5 15 5 15s-10 0-13 10c-3 5-1 12 5 12 7 0 13-5 13-5s-3 10 2 20c3 6 10 10 18 10h40c8 0 15-4 18-10 5-10 2-20 2-20s6 5 13 5c6 0 8-7 5-12-3-10-13-10-13-10s5-5 5-15c0-20-10-35-35-35z' fill='%23ffffff' stroke='%23222' stroke-width='4'/><circle cx='75' cy='65' r='5' fill='%23222'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%23222'/><rect x='20' y='20' width='70' height='70' fill='%23ececd7'/><rect x='90' y='20' width='70' height='70' fill='%23386b52'/><rect x='20' y='90' width='70' height='70' fill='%23386b52'/><rect x='90' y='90' width='70' height='70' fill='%23ececd7'/><path d='M90 40c-25 0-35 15-35 35 0 10 5 15 5 15s-10 0-13 10c-3 5-1 12 5 12 7 0 13-5 13-5s-3 10 2 20c3 6 10 10 18 10h40c8 0 15-4 18-10 5-10 2-20 2-20s6 5 13 5c6 0 8-7 5-12-3-10-13-10-13-10s5-5 5-15c0-20-10-35-35-35z' fill='%23ffffff' stroke='%23222' stroke-width='4'/><circle cx='75' cy='65' r='5' fill='%23222'/></svg>">
+  <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22체스 좌표 읽기 훈련%22,%22short_name%22:%22체스기보%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23222222%22,%22theme_color%22:%22%23386b52%22}">
   <style>
-    /* UI Progress Markers 및 완벽한 반응형 정사각형 보드 연출을 위한 전용 스타일 */
-    body { font-family: sans-serif; user-select: none; -webkit-user-select: none; background-color: #222222; }
+    body { font-family: sans-serif; user-select: none; -webkit-user-select: none; background-color: #222222; margin-top: -20px; }
     .chess-board { display: grid; grid-template-columns: repeat(8, 1fr); width: 100%; max-width: 400px; aspect-ratio: 1 / 1; overflow: hidden; background-color: #222222; border-radius: 8px; }
     .chess-cell { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: all 0.1s ease; width: 100%; }
     .overlay-paused { position: absolute; inset: 0; background: rgba(34, 34, 34, 0.98); backdrop-filter: blur(16px); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -15,12 +17,9 @@
 </head>
 <body class="min-h-screen text-neutral-200 flex flex-col items-center justify-between p-4 md:p-6 py-10">
 
-  <!-- 전체 레이아웃을 위로 20px 끌어올리기 위한 컨테이너 조정 -->
-  <div class="w-full max-w-[480px] flex flex-col items-center justify-between flex-1" style="transform: translateY(-20px);">
-
   <!-- 🚀 INTRO SCREEN -->
-  <main id="introScreen" class="w-full max-w-[360px] bg-[#333333] border border-neutral-800 rounded-2xl p-6 text-center my-auto shadow-2xl">
-    <h2 class="text-xl font-extrabold text-white mb-6 tracking-tight">체스 좌표 읽기 훈련</h2>
+  <main id="introScreen" class="w-full max-w-[360px] bg-[#333333] border border-neutral-800 rounded-2xl p-6 text-center my-auto shadow-2xl flex flex-col gap-6">
+    <h2 class="text-xl font-extrabold text-white tracking-tight">체스 좌표 읽기 훈련</h2>
 
     <button id="startBtn" class="w-full py-3 bg-[#386b52] hover:bg-[#28503e] text-white font-black rounded-xl cursor-pointer text-sm transition-all transform active:scale-95 shadow">
       시작
@@ -30,7 +29,7 @@
   <!-- 🎮 PLAYING SCREEN -->
   <main id="playingScreen" class="w-full max-w-[480px] flex flex-col gap-6 my-auto py-2 hidden">
     
-    <!-- 🔥 stats dashboard -->
+    <!-- 🔥 콤팩트 스태츠 대시보드 -->
     <div class="w-full grid grid-cols-4 gap-3">
       <div class="bg-[#333333] border border-neutral-800 rounded-xl p-2.5 text-center shadow">
         <div class="text-[9px] text-neutral-400 flex items-center justify-center gap-1">🔥 스트릭</div>
@@ -53,31 +52,33 @@
       </div>
     </div>
 
-    <!-- 🎯 Main target notation displaying board (ONLY notation coordinates allowed) -->
+    <!-- 🎯 기보 메인 알림판 -->
     <div class="w-full bg-[#333333] border border-neutral-800 rounded-2xl p-5 text-center relative shadow-lg">
       <div id="notationBlurContainer" class="transition-all duration-350">
+        <!-- 훈련 진영 배지 삭제 완료 -->
         <div id="targetNotation" class="text-4xl font-black text-white font-mono tracking-tight">e4</div>
       </div>
     </div>
 
-    <!-- 🏁 Chess board container -->
+    <!-- 🏁 체스판 레이아웃 -->
     <div class="relative overflow-hidden flex flex-col items-center justify-center w-full my-2">
       
-      <!-- 🛑 Pause overlay screen -->
+      <!-- 🛑 일시정지 오버레이 블러 스크린 -->
       <div id="pauseOverlay" class="overlay-paused hidden">
         <div class="text-3xl mb-2">⏱️</div>
         <div class="text-base font-black text-white mb-6">일시정지 중</div>
+        
         <button id="overlayResumeBtn" class="px-5 py-2.5 bg-[#386b52] hover:bg-[#28503e] text-white font-extrabold rounded-lg text-xs cursor-pointer shadow">
           이어하기
         </button>
       </div>
 
-      <!-- 8x8 actual grid board -->
+      <!-- 8x8 실제 보드판 -->
       <div id="chessBoard" class="chess-board"></div>
 
     </div>
 
-    <!-- 🛠️ control buttons -->
+    <!-- 🛠️ 제어 버튼 셋 -->
     <div class="w-full flex gap-3">
       <button id="pauseBtn" class="flex-1 py-3.5 bg-[#333333] border border-neutral-800 text-neutral-300 hover:bg-neutral-800 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -92,11 +93,9 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="w-full max-w-[480px] text-center text-[10px] text-neutral-600 border-t border-neutral-900 pt-3 mt-8">
+  <footer class="w-full max-w-[480px] text-center text-[10px] text-neutral-600 border-t border-neutral-800 pt-3 mt-8">
     © 2026 The Garden of Everything
   </footer>
-
-  </div>
 
   <script>
     const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -124,7 +123,7 @@
 
     const SARCASTIC_ERRORS = [
       "눈은 데코레이션이야? 그 피스 아니라고!",
-      "체스판에 낙서하지 말고 제대로 좌표 봐라ㅋㅋ",
+      "체스판에 낙서하지 말고 제대로 머릿속 좌표 봐라ㅋㅋ",
       "완벽한 블런더네. 기보 처음 배워?",
       "뇌 정지 왔어? 손가락 움직이기 전에 한 번만 더 생각해.",
       "거긴 절대 갈 수 없는 곳이야. 너의 레이팅처럼 말이지!"
@@ -136,6 +135,88 @@
       "제법인데? 하지만 다음 문제에서 무조건 틀릴걸?",
       "대충 찍은 거 다 알아. 계속해봐."
     ];
+
+    let gameState = 'intro'; 
+    let currentIdx = 0;
+    let currentPuzzle = null;
+    let board = Array(8).fill(null).map(() => Array(8).fill(""));
+    let selectedCell = null;
+    let isPaused = false;
+    const trainingSide = 'w'; 
+
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let problemTimes = [];
+    let timeElapsed = 0.0;
+
+    let timerInterval = null;
+    let accumulatedTime = 0;
+    let lastStartTime = null;
+
+    let wrongSquare = null;
+    let correctSquare = null;
+
+    function playBeep(type) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const now = ctx.currentTime;
+
+        if (type === 'success') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(783.99, now + 0.16);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.linearRampToValueAtTime(70, now + 0.25);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        }
+      } catch (e) {
+        console.warn("Audio Context blocked or not supported on this device.", e);
+      }
+    }
+
+    function loadSavedStats() {
+      try {
+        const savedBest = localStorage.getItem('chess_hell_best_streak_white');
+        const savedTimes = localStorage.getItem('chess_hell_problem_times_white');
+        if (savedBest) {
+          bestStreak = parseInt(savedBest, 10);
+        } else {
+          bestStreak = 0;
+        }
+        if (savedTimes) {
+          problemTimes = JSON.parse(savedTimes);
+        } else {
+          problemTimes = [];
+        }
+      } catch (e) {
+        console.warn("로컬 스토리지를 사용할 수 없어 임시 데이터로 구동합니다:", e);
+        bestStreak = 0;
+        problemTimes = [];
+      }
+    }
+
+    function saveStats() {
+      try {
+        localStorage.setItem('chess_hell_best_streak_white', bestStreak.toString());
+        localStorage.setItem('chess_hell_problem_times_white', JSON.stringify(problemTimes));
+      } catch (e) {
+        console.warn("데이터 영구 저장에 실패했습니다:", e);
+      }
+    }
 
     function getStandardBoard() {
       return [
@@ -157,97 +238,118 @@
       bd[from.r][from.c] = "";
     }
 
-    const OPENING_PRESETS = [
-      {
-        title: "루이 로페즈 (Ruy Lopez)",
-        setup: (bd) => {
-          applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
-          applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
-        },
-        from: "f1", to: "b5", notation: "Bb5",
-        desc: "백의 f1 비숍을 b5로 기동하여 흑의 c6 나이트를 압박하고 중앙 우위를 다집니다."
-      },
-      {
-        title: "이탈리안 게임 (Italian Game)",
-        setup: (bd) => {
-          applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
-          applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
-        },
-        from: "f1", to: "c4", notation: "Bc4",
-        desc: "비숍을 c4에 배치하여 흑의 가장 부서지기 쉬운 f7 폰을 즉각 저격합니다."
-      },
-      {
-        title: "퀸즈 갬빗 (Queen's Gambit)",
-        setup: (bd) => {
-          applyMove(bd, "d2", "d4"); applyMove(bd, "d7", "d5");
-        },
-        from: "c2", to: "c4", notation: "c4",
-        desc: "c폰을 미끼로 던지는 척하며 중앙 통제권을 틀어쥐는 유서 깊은 빌드입니다."
-      },
-      {
-        title: "시실리안 디펜스 (Sicilian: Open)",
-        setup: (bd) => {
-          applyMove(bd, "e2", "e4"); applyMove(bd, "c7", "c5");
-          applyMove(bd, "g1", "f3"); applyMove(bd, "d7", "d6");
-        },
-        from: "d2", to: "d4", notation: "d4",
-        desc: "백이 중앙 d4를 박차고 전진하여 강력한 센터 장악 및 공격 템포를 조율합니다."
-      },
-      {
-        title: "스카치 게임 (Scotch Game)",
-        setup: (bd) => {
-          applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5");
-          applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6");
-        },
-        from: "d2", to: "d4", notation: "d4",
-        desc: "초반부터 중앙 d4 공간을 적극적으로 오픈하며 속공 전술의 서막을 엽니다."
-      },
-      {
-        title: "잉글리시 오프닝 (English Opening)",
-        setup: (bd) => {}, 
-        from: "c2", to: "c4", notation: "c4",
-        desc: "측면 c폰을 한 칸 더 전진시켜 중앙의 d5 공간을 가로지르는 우아한 측면 압박 오프닝입니다."
-      }
+    const OPENING_PRESETS_WHITE = [
+      { title: "루이 로페즈 (Ruy Lopez)", setup: (bd) => { applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5"); applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6"); }, from: "f1", to: "b5", notation: "Bb5" },
+      { title: "이탈리안 게임 (Italian Game)", setup: (bd) => { applyMove(bd, "e2", "e4"); applyMove(bd, "e7", "e5"); applyMove(bd, "g1", "f3"); applyMove(bd, "b8", "c6"); }, from: "f1", to: "c4", notation: "Bc4" },
+      { title: "퀸즈 갬빗 (Queen's Gambit)", setup: (bd) => { applyMove(bd, "d2", "d4"); applyMove(bd, "d7", "d5"); }, from: "c2", to: "c4", notation: "c4" }
     ];
 
-    let gameState = 'intro'; 
-    let currentIdx = 0;
-    let currentPuzzle = null;
-    let board = Array(8).fill(null).map(() => Array(8).fill(""));
-    let selectedCell = null;
-    let isPaused = false;
+    function checkAttacking(bd, r1, c1, r2, c2, type, isWhitePiece) {
+      const dr = r2 - r1;
+      const dc = c2 - c1;
+      const absDr = Math.abs(dr);
+      const absDc = Math.abs(dc);
 
-    // 로컬스토리지를 통한 영구 통계 보존 연동
-    let currentStreak = 0;
-    let bestStreak = parseInt(localStorage.getItem('bestStreak')) || 0;
-    let problemTimes = JSON.parse(localStorage.getItem('problemTimes')) || [];
-    let timeElapsed = 0.0;
+      if (type === 'P') {
+        const forward = -1; // 백은 위로 전진
+        return (dr === forward && absDc === 1);
+      }
+      if (type === 'N') {
+        return (absDr === 2 && absDc === 1) || (absDr === 1 && absDc === 2);
+      }
+      if (type === 'B') {
+        if (absDr !== absDc) return false;
+        const stepR = Math.sign(dr);
+        const stepC = Math.sign(dc);
+        let currR = r1 + stepR;
+        let currC = c1 + stepC;
+        while (currR !== r2 || currC !== c2) {
+          if (bd[currR][currC] !== '') return false;
+          currR += stepR;
+          currC += stepC;
+        }
+        return true;
+      }
+      if (type === 'R') {
+        if (r1 !== r2 && c1 !== c2) return false;
+        const stepR = Math.sign(dr);
+        const stepC = Math.sign(dc);
+        let currR = r1 + stepR;
+        let currC = c1 + stepC;
+        while (currR !== r2 || currC !== c2) {
+          if (bd[currR][currC] !== '') return false;
+          currR += stepR;
+          currC += stepC;
+        }
+        return true;
+      }
+      if (type === 'Q') {
+        if (absDr === absDc || r1 === r2 || c1 === c2) {
+          const stepR = Math.sign(dr);
+          const stepC = Math.sign(dc);
+          let currR = r1 + stepR;
+          let currC = c1 + stepC;
+          while (currR !== r2 || currC !== c2) {
+            if (bd[currR][currC] !== '') return false;
+            currR += stepR;
+            currC += stepC;
+          }
+          return true;
+        }
+        return false;
+      }
+      return false;
+    }
 
-    let timerInterval = null;
-    let accumulatedTime = 0;
-    let lastStartTime = null;
-
-    let wrongSquare = null;
-    let correctSquare = null;
+    function isKingInCheck(bd, kingR, kingC, defenderColor) {
+      const attackerColor = defenderColor === 'w' ? 'b' : 'w';
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = bd[r][c];
+          if (p.startsWith(attackerColor) && p !== `${attackerColor}K`) {
+            const type = p[1];
+            if (checkAttacking(bd, r, c, kingR, kingC, type, attackerColor === 'w')) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
 
     function generateInfinitePuzzle(id) {
       const phases = ['opening', 'middlegame', 'endgame'];
       const phase = phases[Math.floor(Math.random() * phases.length)];
 
+      const activeColor = 'w'; 
+      const oppColor = 'b';
+      const limits = { P: 8, N: 2, B: 2, R: 2, Q: 1 };
+
       if (phase === 'opening') {
-        const preset = OPENING_PRESETS[Math.floor(Math.random() * OPENING_PRESETS.length)];
+        const preset = OPENING_PRESETS_WHITE[Math.floor(Math.random() * OPENING_PRESETS_WHITE.length)];
         const openingBoard = getStandardBoard();
         preset.setup(openingBoard);
+
+        const tempBoard = openingBoard.map(row => [...row]);
+        tempBoard[toR] = tempBoard[toR] || []; // Boundary protection
+        applyMove(tempBoard, preset.from, preset.to);
+        
+        let oppKingR = -1, oppKingC = -1;
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            if (tempBoard[r][c] === 'bK') { oppKingR = r; oppKingC = c; break; }
+          }
+        }
+        const deliversCheck = oppKingR !== -1 && isKingInCheck(tempBoard, oppKingR, oppKingC, 'b');
+        const notation = preset.notation + (deliversCheck ? '+' : '');
 
         return {
           id,
           phase: "오프닝 상황",
           title: preset.title,
-          notation: preset.notation,
-          turn: 'White',
+          notation: notation,
           from: preset.from,
           to: preset.to,
-          desc: preset.desc,
           board: openingBoard
         };
       }
@@ -262,8 +364,6 @@
       ];
 
       const piece = pieces[Math.floor(Math.random() * pieces.length)];
-      const colorChar = 'w';
-      const oppColorChar = 'b';
 
       let fromR = 0, fromC = 0, toR = 0, toC = 0;
       let valid = false;
@@ -280,17 +380,21 @@
         let moves = [];
 
         if (piece.type === 'P') {
+          const forward = -1; // 백은 위로 전진
+          const startRank = 6;
           if (isCapture) {
-            const nextR = fromR - 1;
-            if (nextR >= 0) {
+            const nextR = fromR + forward;
+            if (nextR >= 0 && nextR < 8) {
               if (fromC - 1 >= 0) moves.push({ r: nextR, c: fromC - 1 });
               if (fromC + 1 < 8) moves.push({ r: nextR, c: fromC + 1 });
             }
           } else {
-            const nextR1 = fromR - 1;
-            if (nextR1 >= 0) {
+            const nextR1 = fromR + forward;
+            if (nextR1 >= 0 && nextR1 < 8) {
               moves.push({ r: nextR1, c: fromC });
-              if (fromR === 6) moves.push({ r: fromR - 2, c: fromC });
+              if (fromR === startRank) {
+                moves.push({ r: fromR + forward * 2, c: fromC });
+              }
             }
           }
         } else if (piece.type === 'N') {
@@ -365,11 +469,20 @@
         }
       }
 
+      const whiteCounts = { P: 0, N: 0, B: 0, R: 0, Q: 0, K: 1 };
+      const blackCounts = { P: 0, N: 0, B: 0, R: 0, Q: 0, K: 1 };
+
+      if (piece.type !== 'K') {
+        whiteCounts[piece.type] = 1;
+      }
+
       let wK_R = 7, wK_C = 4, bK_R = 0, bK_C = 4;
 
       if (piece.type === 'K') {
         wK_R = fromR; wK_C = fromC;
-      } else {
+      }
+
+      if (piece.type !== 'K') {
         let wK_placed = false;
         while (!wK_placed) {
           const r = Math.floor(Math.random() * 8);
@@ -416,19 +529,20 @@
         }
       }
 
-      newBoard[fromR][fromC] = colorChar + piece.type;
+      newBoard[fromR][fromC] = 'w' + piece.type;
       
       if (isActuallyCapture) {
         const bPieces = ['P', 'N', 'B', 'R', 'Q'];
         let bType = bPieces[Math.floor(Math.random() * bPieces.length)];
         if (bType === 'P' && (toR === 0 || toR === 7)) bType = 'N';
         newBoard[toR][toC] = 'b' + bType;
+        blackCounts[bType] = 1;
       } else {
         newBoard[toR][toC] = "";
       }
 
-      let extraWhiteMax = (phase === 'middlegame') ? 7 : 1;
-      let extraBlackMax = (phase === 'middlegame') ? 7 : 1;
+      let extraWhiteMax = (phase === 'middlegame') ? 5 : 1;
+      let extraBlackMax = (phase === 'middlegame') ? 5 : 1;
 
       let currentWhiteNonKing = (piece.type !== 'K') ? 1 : 0;
       let currentBlackNonKing = isActuallyCapture ? 1 : 0;
@@ -436,8 +550,7 @@
       const numExtraWhite = Math.max(0, Math.floor(Math.random() * (extraWhiteMax + 1 - currentWhiteNonKing)));
       const numExtraBlack = Math.max(0, Math.floor(Math.random() * (extraBlackMax + 1 - currentBlackNonKing)));
 
-      const wPool = ['wP', 'wN', 'wB', 'wR', 'wQ'];
-      const bPool = ['bP', 'bN', 'bB', 'bR', 'bQ'];
+      const pieceTypes = ['P', 'N', 'B', 'R', 'Q'];
 
       let extraWhitePlaced = 0, placeAttempts = 0;
       while (extraWhitePlaced < numExtraWhite && placeAttempts < 100) {
@@ -445,11 +558,15 @@
         const r = Math.floor(Math.random() * 8);
         const c = Math.floor(Math.random() * 8);
         if (!forbidden.has(`${r}-${c}`)) {
-          const p = wPool[Math.floor(Math.random() * wPool.length)];
-          if (p.endsWith('P') && (r === 0 || r === 7)) continue;
-          newBoard[r][c] = p;
-          forbidden.add(`${r}-${c}`);
-          extraWhitePlaced++;
+          const t = pieceTypes[Math.floor(Math.random() * pieceTypes.length)];
+          if (t === 'P' && (r === 0 || r === 7)) continue;
+          // 이중체킹 방지 조건문 확실히 작동 보장
+          if (whiteCounts[t] < limits[t]) {
+            newBoard[r][c] = 'w' + t;
+            forbidden.add(`${r}-${c}`);
+            whiteCounts[t]++;
+            extraWhitePlaced++;
+          }
         }
       }
 
@@ -460,11 +577,15 @@
         const c = Math.floor(Math.random() * 8);
         const distToWK = Math.max(Math.abs(r - wK_R), Math.abs(c - wK_C));
         if (!forbidden.has(`${r}-${c}`) && distToWK > 1) {
-          const p = bPool[Math.floor(Math.random() * bPool.length)];
-          if (p.endsWith('P') && (r === 0 || r === 7)) continue;
-          newBoard[r][c] = p;
-          forbidden.add(`${r}-${c}`);
-          extraBlackPlaced++;
+          const t = pieceTypes[Math.floor(Math.random() * pieceTypes.length)];
+          if (t === 'P' && (r === 0 || r === 7)) continue;
+          // 이중체킹 방지 조건문 확실히 작동 보장
+          if (blackCounts[t] < limits[t]) {
+            newBoard[r][c] = 'b' + t;
+            forbidden.add(`${r}-${c}`);
+            blackCounts[t]++;
+            extraBlackPlaced++;
+          }
         }
       }
 
@@ -480,19 +601,23 @@
         notation = piece.type + (isActuallyCapture ? 'x' : '') + targetCoord;
       }
 
-      if (Math.random() > 0.8 && piece.type !== 'K') {
+      const tempBoard = newBoard.map(row => [...row]);
+      tempBoard[toR][toC] = 'w' + piece.type;
+      tempBoard[fromR][fromC] = "";
+
+      let targetKingR = bK_R, targetKingC = bK_C;
+      const deliversCheck = isKingInCheck(tempBoard, targetKingR, targetKingC, 'b');
+      if (deliversCheck) {
         notation += '+';
       }
 
       return {
         id,
-        phase: phase === 'middlegame' ? "미들게임" : "엔드게임",
+        phase: phase === 'middlegame' ? "미들게임 상황" : "엔드게임 상황",
         title: `백의 ${piece.name}`,
         notation,
-        turn: 'White',
         from: FILES[fromC] + RANKS[fromR],
         to: targetCoord,
-        desc: `백 ${piece.name}을 ${notation}로 이동시켜!`,
         board: newBoard
       };
     }
@@ -519,23 +644,6 @@
       }
     }
 
-    // 직관적인 퀴즈 박스 흔들림 피드백 메커니즘 (테스트 좌표만 활용)
-    function flashFeedback(status) {
-      const targetNotation = document.getElementById('targetNotation');
-      if (status === 'success') {
-        targetNotation.className = "text-4xl font-black text-green-400 font-mono tracking-tight animate-pulse";
-      } else if (status === 'error') {
-        targetNotation.className = "text-4xl font-black text-red-500 font-mono tracking-tight animate-bounce";
-      } else {
-        targetNotation.className = "text-4xl font-black text-white font-mono tracking-tight";
-      }
-    }
-
-    function resetFeedback() {
-      const targetNotation = document.getElementById('targetNotation');
-      targetNotation.className = "text-4xl font-black text-white font-mono tracking-tight";
-    }
-
     function setScreen(state) {
       gameState = state;
       if (state === 'intro') {
@@ -560,7 +668,6 @@
         btnText.innerText = "일시정지";
         lastStartTime = performance.now();
         startTimer();
-        flashFeedback('normal');
       } else {
         stopTimer();
         accumulatedTime += (performance.now() - lastStartTime);
@@ -568,11 +675,11 @@
         pauseOverlay.classList.remove('hidden');
         notationContainer.classList.add('blur-sm');
         btnText.innerText = "이어하기";
-        flashFeedback('normal');
       }
     }
 
     function startGame() {
+      loadSavedStats();
       setScreen('playing');
       
       currentIdx = 0;
@@ -582,10 +689,6 @@
       wrongSquare = null;
       correctSquare = null;
       accumulatedTime = 0;
-
-      // 역사적인 보전 기록 복구
-      bestStreak = parseInt(localStorage.getItem('bestStreak')) || 0;
-      problemTimes = JSON.parse(localStorage.getItem('problemTimes')) || [];
 
       document.getElementById('pauseOverlay').classList.add('hidden');
       document.getElementById('notationBlurContainer').classList.remove('blur-sm');
@@ -602,7 +705,6 @@
       correctSquare = null;
       accumulatedTime = 0;
 
-      resetFeedback();
       document.getElementById('targetNotation').innerText = currentPuzzle.notation;
       
       document.getElementById('statStreak').innerText = currentStreak;
@@ -629,24 +731,23 @@
         if (r === sourceCoords.r && c === sourceCoords.c) {
           selectedCell = { r, c };
           wrongSquare = null;
-          flashFeedback('success');
           renderBoard();
         } else {
+          playBeep('error');
           wrongSquare = { r, c };
           renderBoard();
           setTimeout(() => { wrongSquare = null; renderBoard(); }, 600);
-          flashFeedback('error');
         }
       } else {
         if (r === selectedCell.r && c === selectedCell.c) {
           selectedCell = null;
-          flashFeedback('normal');
           renderBoard();
           return;
         }
 
         if (r === targetCoords.r && c === targetCoords.c) {
           stopTimer();
+          playBeep('success');
           correctSquare = { r, c };
 
           board[r][c] = board[selectedCell.r][selectedCell.c];
@@ -656,14 +757,11 @@
           currentStreak++;
           if (currentStreak > bestStreak) {
             bestStreak = currentStreak;
-            localStorage.setItem('bestStreak', bestStreak);
           }
 
           const finalTime = Number(((accumulatedTime + (performance.now() - lastStartTime)) / 1000).toFixed(2));
           problemTimes.push(finalTime);
-          
-          // 로컬 데이터 무한 저장
-          localStorage.setItem('problemTimes', JSON.stringify(problemTimes));
+          saveStats();
 
           setTimeout(() => {
             currentIdx++;
@@ -671,12 +769,12 @@
           }, 1000);
 
         } else {
+          playBeep('error');
           wrongSquare = { r, c };
           renderBoard();
           setTimeout(() => { wrongSquare = null; renderBoard(); }, 600);
           selectedCell = null;
           currentStreak = 0;
-          flashFeedback('error');
           renderBoard();
         }
       }
@@ -696,19 +794,18 @@
           const isWrg = wrongSquare?.r === r && wrongSquare?.c === c;
           const isCor = correctSquare?.r === r && correctSquare?.c === c;
 
-          // 보더 장식 없이 고대비 단일 면색(Background)으로만 직관적으로 가이딩
-          let overlayStyle = "";
-          if (isSel) {
-            overlayStyle = "background: #00e5ff;"; // 선명하고 또렷한 Cyan
-          } else if (isWrg) {
-            overlayStyle = "background: #ff3d00;"; // 직관적인 Coral Red
-          } else if (isCor) {
-            overlayStyle = "background: #00e676;"; // 확연한 Neon Green
-          }
-
           const cell = document.createElement('div');
           cell.className = "chess-cell";
-          cell.style = `background: ${overlayStyle || baseBg};`;
+          
+          if (isSel) {
+            cell.style.backgroundColor = "#00e5ff"; 
+          } else if (isWrg) {
+            cell.style.backgroundColor = "#ff1744"; 
+          } else if (isCor) {
+            cell.style.backgroundColor = "#00e676"; 
+          } else {
+            cell.style.backgroundColor = baseBg;
+          }
           
           cell.addEventListener('click', (e) => {
             e.preventDefault();
@@ -739,6 +836,12 @@
     }
 
     window.onload = function() {
+      try {
+        loadSavedStats();
+      } catch (e) {
+        console.warn(e);
+      }
+
       document.getElementById('startBtn').addEventListener('click', startGame);
       document.getElementById('exitBtn').addEventListener('click', () => {
         stopTimer();
@@ -746,7 +849,10 @@
       });
 
       document.getElementById('pauseBtn').addEventListener('click', togglePause);
-      document.getElementById('overlayResumeBtn').addEventListener('click', togglePause);
+      document.getElementById('overlayResumeBtn').addEventListener('click', () => {
+        togglePause();
+        loadNextPuzzle(currentIdx + 1);
+      });
     }
   </script>
 </body>
